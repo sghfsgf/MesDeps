@@ -3,95 +3,125 @@
 // Firebase + Firestore
 // ============================================================
 
+
 // ============================================================
 // 1. CONFIGURATION FIREBASE
 // ============================================================
 
 const firebaseConfig = {
+
   apiKey: "AIzaSyB6CTUcJWbwL8GK-65PCFS1z7HXtDKYWEo",
+
   authDomain: "mesdeps.firebaseapp.com",
+
   projectId: "mesdeps",
+
   storageBucket: "mesdeps.firebasestorage.app",
+
   messagingSenderId: "216030223679",
+
   appId: "1:216030223679:web:d6ee1c2aafd3f939c9078a"
+
 };
 
-// Initialisation Firebase
+
+// ============================================================
+// 2. INITIALISATION FIREBASE
+// ============================================================
 
 if (!firebase.apps.length) {
+
   firebase.initializeApp(firebaseConfig);
+
 }
 
-// Connexion Firestore
+
+// Firestore
 
 const db = firebase.firestore();
 
-// Connexion Authentication
+
+// Authentication
 
 const auth = firebase.auth();
 
+
 // ============================================================
-// 2. VARIABLES
+// 3. VARIABLES
 // ============================================================
 
 let toutesLesDepenses = [];
 
 
 // ============================================================
-// 2. UTILITAIRES
+// 4. UTILITAIRES
 // ============================================================
 
+
+// ------------------------------------------------------------
 // Date du jour : YYYY-MM-DD
+// ------------------------------------------------------------
 
 function getToday() {
 
   const maintenant = new Date();
 
-  const annee = maintenant.getFullYear();
+  const annee =
+    maintenant.getFullYear();
 
-  const mois = String(
-    maintenant.getMonth() + 1
-  ).padStart(2, "0");
+  const mois =
+    String(
+      maintenant.getMonth() + 1
+    ).padStart(2, "0");
 
-  const jour = String(
-    maintenant.getDate()
-  ).padStart(2, "0");
+  const jour =
+    String(
+      maintenant.getDate()
+    ).padStart(2, "0");
 
   return `${annee}-${mois}-${jour}`;
+
 }
 
 
-// ============================================================
-// FORMAT MONÉTAIRE
-// ============================================================
+// ------------------------------------------------------------
+// Format monétaire tunisien
+// ------------------------------------------------------------
 
 function formatMoney(montant) {
 
-  const nombre = Number(montant);
+  const nombre =
+    Number(montant);
 
   if (isNaN(nombre)) {
+
     return "0,000 DT";
+
   }
 
   return nombre
     .toFixed(3)
     .replace(".", ",") + " DT";
+
 }
 
 
-// ============================================================
-// FORMAT DATE
-// ============================================================
+// ------------------------------------------------------------
+// Format date
+// ------------------------------------------------------------
 
 function formatDate(dateStr) {
 
   if (!dateStr) {
+
     return "";
+
   }
 
-  const date = new Date(
-    dateStr + "T00:00:00"
-  );
+  const date =
+    new Date(
+      dateStr + "T00:00:00"
+    );
 
   return date.toLocaleDateString(
     "fr-FR",
@@ -102,11 +132,12 @@ function formatDate(dateStr) {
       year: "numeric"
     }
   );
+
 }
 
 
 // ============================================================
-// 3. MODAL
+// 5. MODAL
 // ============================================================
 
 function ouvrirModal() {
@@ -115,23 +146,37 @@ function ouvrirModal() {
     document.getElementById("modal");
 
   if (!modal) {
+
     return;
+
   }
 
   const champDate =
     document.getElementById("date");
 
   if (champDate) {
-    champDate.value = getToday();
+
+    champDate.value =
+      getToday();
+
   }
 
-  modal.classList.remove("hidden");
+  modal.classList.remove(
+    "hidden"
+  );
 
-  modal.classList.add("flex");
+  modal.classList.add(
+    "flex"
+  );
 
   gererAutres();
+
 }
 
+
+// ------------------------------------------------------------
+// Fermer le modal
+// ------------------------------------------------------------
 
 function fermerModal() {
 
@@ -139,13 +184,19 @@ function fermerModal() {
     document.getElementById("modal");
 
   const formulaire =
-    document.getElementById("form-depense");
+    document.getElementById(
+      "form-depense"
+    );
 
   if (modal) {
 
-    modal.classList.add("hidden");
+    modal.classList.add(
+      "hidden"
+    );
 
-    modal.classList.remove("flex");
+    modal.classList.remove(
+      "flex"
+    );
 
   }
 
@@ -156,11 +207,15 @@ function fermerModal() {
   }
 
   const champAutres =
-    document.getElementById("champ-autres");
+    document.getElementById(
+      "champ-autres"
+    );
 
   if (champAutres) {
 
-    champAutres.classList.add("hidden");
+    champAutres.classList.add(
+      "hidden"
+    );
 
   }
 
@@ -168,126 +223,60 @@ function fermerModal() {
 
 
 // ============================================================
-// 4. CATÉGORIE AUTRES
+// 6. CATÉGORIE AUTRES
 // ============================================================
 
 function gererAutres() {
 
   const categorie =
-    document.getElementById("categorie");
+    document.getElementById(
+      "categorie"
+    );
 
   const champ =
-    document.getElementById("champ-autres");
+    document.getElementById(
+      "champ-autres"
+    );
 
   const precision =
-    document.getElementById("precision-autres");
+    document.getElementById(
+      "precision-autres"
+    );
 
   if (
     !categorie ||
     !champ ||
     !precision
   ) {
+
     return;
+
   }
 
+  if (
+    categorie.value === "Autres"
+  ) {
 
-  if (categorie.value === "Autres") {
+    champ.classList.remove(
+      "hidden"
+    );
 
-    champ.classList.remove("hidden");
-
-    precision.required = true;
+    precision.required =
+      true;
 
   }
 
   else {
 
-    champ.classList.add("hidden");
-
-    precision.required = false;
-
-    precision.value = "";
-
-  }
-
-}
-
-
-// ============================================================
-// 5. CHARGER LES DONNÉES DEPUIS LOCALSTORAGE
-// ============================================================
-
-function chargerDepuisLocalStorage() {
-
-  try {
-
-    const donnees =
-      localStorage.getItem(
-        CLE_STOCKAGE
-      );
-
-
-    if (!donnees) {
-
-      toutesLesDepenses = [];
-
-      return;
-
-    }
-
-
-    toutesLesDepenses =
-      JSON.parse(donnees);
-
-
-    if (!Array.isArray(toutesLesDepenses)) {
-
-      toutesLesDepenses = [];
-
-    }
-
-  }
-
-  catch (error) {
-
-    console.error(
-      "Erreur lecture localStorage :",
-      error
+    champ.classList.add(
+      "hidden"
     );
 
-    toutesLesDepenses = [];
+    precision.required =
+      false;
 
-  }
-
-}
-
-
-// ============================================================
-// 6. SAUVEGARDER DANS LOCALSTORAGE
-// ============================================================
-
-function sauvegarderDepenses() {
-
-  try {
-
-    localStorage.setItem(
-      CLE_STOCKAGE,
-      JSON.stringify(
-        toutesLesDepenses
-      )
-    );
-
-  }
-
-  catch (error) {
-
-    console.error(
-      "Erreur sauvegarde :",
-      error
-    );
-
-    alert(
-      "Impossible de sauvegarder les données."
-    );
+    precision.value =
+      "";
 
   }
 
@@ -308,10 +297,14 @@ if (formulaire) {
 
   formulaire.addEventListener(
     "submit",
-    function (e) {
+    async function(e) {
 
       e.preventDefault();
 
+
+      // ------------------------------------------------------
+      // Récupération des champs
+      // ------------------------------------------------------
 
       const montant =
         parseFloat(
@@ -351,9 +344,9 @@ if (formulaire) {
           .trim();
 
 
-      // ------------------------------------------
+      // ------------------------------------------------------
       // Vérifications
-      // ------------------------------------------
+      // ------------------------------------------------------
 
       if (
         !montant ||
@@ -391,9 +384,9 @@ if (formulaire) {
       }
 
 
-      // ------------------------------------------
-      // Catégorie Autres
-      // ------------------------------------------
+      // ------------------------------------------------------
+      // Gestion de AUTRES
+      // ------------------------------------------------------
 
       if (
         categorie === "Autres"
@@ -410,82 +403,72 @@ if (formulaire) {
         }
 
         categorie =
-          "Autres - " + precision;
+          "Autres - " +
+          precision;
 
       }
 
 
-      // ------------------------------------------
-      // Création de la dépense
-      // ------------------------------------------
+      // ------------------------------------------------------
+      // ENREGISTREMENT FIRESTORE
+      // ------------------------------------------------------
 
-      const nouvelleDepense = {
+      try {
 
-        id:
-          Date.now().toString(),
+        await db
+          .collection("depenses")
+          .add({
 
-        montant:
-          montant,
+            montant:
+              montant,
 
-        date:
-          date,
+            date:
+              date,
 
-        categorie:
-          categorie,
+            categorie:
+              categorie,
 
-        description:
-          description,
+            description:
+              description,
 
-        createdAt:
-          new Date().toISOString()
+            createdAt:
+              firebase.firestore
+                .FieldValue
+                .serverTimestamp()
 
-      };
-
-
-      // Ajouter au début
-
-      toutesLesDepenses.unshift(
-        nouvelleDepense
-      );
+          });
 
 
-      // Trier par date décroissante
+        // Fermer le formulaire
 
-      toutesLesDepenses.sort(
-        function (a, b) {
-
-          return b.date.localeCompare(
-            a.date
-          );
-
-        }
-      );
+        fermerModal();
 
 
-      // Sauvegarder
+        // Recharger les données
 
-      sauvegarderDepenses();
-
-
-      // Fermer
-
-      fermerModal();
+        await chargerDepuisFirebase();
 
 
-      // Actualiser
+        alert(
+          "Dépense enregistrée avec succès."
+        );
 
-      afficherDepenses(
-        toutesLesDepenses
-      );
-
-      mettreAJourResume(
-        toutesLesDepenses
-      );
+      }
 
 
-      alert(
-        "Dépense enregistrée avec succès."
-      );
+      catch (error) {
+
+        console.error(
+          "Erreur Firebase :",
+          error
+        );
+
+        alert(
+          "Erreur lors de l'enregistrement :\n" +
+          error.message
+        );
+
+      }
 
     }
   );
@@ -494,7 +477,85 @@ if (formulaire) {
 
 
 // ============================================================
-// 8. AFFICHER LES DÉPENSES
+// 8. CHARGER LES DÉPENSES DEPUIS FIRESTORE
+// ============================================================
+
+async function chargerDepuisFirebase() {
+
+  try {
+
+    const snapshot =
+      await db
+        .collection("depenses")
+        .orderBy(
+          "date",
+          "desc"
+        )
+        .get();
+
+
+    toutesLesDepenses = [];
+
+
+    snapshot.forEach(
+      function(doc) {
+
+        toutesLesDepenses.push({
+
+          id:
+            doc.id,
+
+          ...doc.data()
+
+        });
+
+      }
+    );
+
+
+    afficherDepenses(
+      toutesLesDepenses
+    );
+
+
+    mettreAJourResume(
+      toutesLesDepenses
+    );
+
+  }
+
+
+  catch (error) {
+
+    console.error(
+      "Erreur chargement Firebase :",
+      error
+    );
+
+
+    const liste =
+      document.getElementById(
+        "liste-depenses"
+      );
+
+
+    if (liste) {
+
+      liste.innerHTML = `
+        <p class="text-red-500">
+          ❌ Erreur lors du chargement des dépenses.
+        </p>
+      `;
+
+    }
+
+  }
+
+}
+
+
+// ============================================================
+// 9. AFFICHER LES DÉPENSES
 // ============================================================
 
 function afficherDepenses(
@@ -508,7 +569,9 @@ function afficherDepenses(
 
 
   if (!conteneur) {
+
     return;
+
   }
 
 
@@ -518,13 +581,9 @@ function afficherDepenses(
   ) {
 
     conteneur.innerHTML = `
-
       <p class="text-gray-400 text-sm">
-
         Aucune dépense enregistrée.
-
       </p>
-
     `;
 
     return;
@@ -534,7 +593,7 @@ function afficherDepenses(
 
   conteneur.innerHTML =
     depenses.map(
-      function (d) {
+      function(d) {
 
         return `
 
@@ -560,7 +619,9 @@ function afficherDepenses(
               <p class="text-sm
                         text-gray-500">
 
-                ${formatDate(d.date)}
+                ${formatDate(
+                  d.date
+                )}
 
                 ${
                   d.description
@@ -590,7 +651,6 @@ function afficherDepenses(
 
               <button
                 onclick="supprimerDepense('${d.id}')"
-
                 class="text-xs
                        text-gray-400
                        hover:text-red-500
@@ -613,7 +673,7 @@ function afficherDepenses(
 
 
 // ============================================================
-// 9. PROTECTION HTML
+// 10. PROTECTION HTML
 // ============================================================
 
 function echapperHTML(
@@ -651,10 +711,10 @@ function echapperHTML(
 
 
 // ============================================================
-// 10. SUPPRIMER UNE DÉPENSE
+// 11. SUPPRIMER UNE DÉPENSE
 // ============================================================
 
-function supprimerDepense(
+async function supprimerDepense(
   id
 ) {
 
@@ -669,33 +729,39 @@ function supprimerDepense(
   }
 
 
-  toutesLesDepenses =
-    toutesLesDepenses.filter(
-      function (d) {
+  try {
 
-        return d.id !== id;
+    await db
+      .collection("depenses")
+      .doc(id)
+      .delete();
 
-      }
+
+    await chargerDepuisFirebase();
+
+  }
+
+
+  catch (error) {
+
+    console.error(
+      "Erreur suppression Firebase :",
+      error
     );
 
 
-  sauvegarderDepenses();
+    alert(
+      "Erreur lors de la suppression :\n" +
+      error.message
+    );
 
-
-  afficherDepenses(
-    toutesLesDepenses
-  );
-
-
-  mettreAJourResume(
-    toutesLesDepenses
-  );
+  }
 
 }
 
 
 // ============================================================
-// 11. RÉSUMÉ
+// 12. RÉSUMÉ
 // ============================================================
 
 function mettreAJourResume(
@@ -706,11 +772,12 @@ function mettreAJourResume(
 
 
   depenses.forEach(
-    function (d) {
+    function(d) {
 
-      total += Number(
-        d.montant || 0
-      );
+      total +=
+        Number(
+          d.montant || 0
+        );
 
     }
   );
@@ -771,7 +838,7 @@ function mettreAJourResume(
 
 
 // ============================================================
-// 12. FILTRER
+// 13. FILTRER
 // ============================================================
 
 function appliquerFiltres() {
@@ -804,7 +871,7 @@ function appliquerFiltres() {
 
   const resultats =
     toutesLesDepenses.filter(
-      function (d) {
+      function(d) {
 
 
         // Date début
@@ -851,7 +918,7 @@ function appliquerFiltres() {
 
         if (recherche) {
 
-          const texte = (
+          const texte =
 
             String(
               d.categorie || ""
@@ -861,15 +928,15 @@ function appliquerFiltres() {
 
             String(
               d.description || ""
-            )
-
-          ).toLowerCase();
+            );
 
 
           if (
-            !texte.includes(
-              recherche
-            )
+            !texte
+              .toLowerCase()
+              .includes(
+                recherche
+              )
           ) {
 
             return false;
@@ -898,7 +965,7 @@ function appliquerFiltres() {
 
 
 // ============================================================
-// 13. RÉINITIALISER LES FILTRES
+// 14. RÉINITIALISER LES FILTRES
 // ============================================================
 
 function reinitialiserFiltres() {
@@ -968,11 +1035,8 @@ function reinitialiserFiltres() {
 
 
 // ============================================================
-// 14. DÉMARRAGE
+// 15. DÉMARRAGE
 // ============================================================
-
-chargerDepuisLocalStorage();
-
 
 if (
   document.getElementById(
@@ -980,12 +1044,6 @@ if (
   )
 ) {
 
-  afficherDepenses(
-    toutesLesDepenses
-  );
-
-  mettreAJourResume(
-    toutesLesDepenses
-  );
+  chargerDepuisFirebase();
 
 }
