@@ -1,156 +1,289 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Suivi de Dépenses - SIAD</title>
+
+  <title>MesDeps - Gestion des dépenses</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
   <!-- CSS personnalisé -->
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body class="bg-gray-100 min-h-screen">
 
-  <div class="max-w-6xl mx-auto px-4 py-8">
+  <!-- ============================= -->
+  <!-- MENU PRINCIPAL -->
+  <!-- ============================= -->
+
+  <nav class="bg-blue-600 text-white shadow-md">
+
+    <div class="max-w-6xl mx-auto px-4">
+
+      <div class="flex items-center justify-between h-16">
+
+        <!-- Logo / Nom -->
+        <a href="index.html"
+           class="text-xl font-bold">
+          💰 MesDeps
+        </a>
+
+        <!-- Menu -->
+        <div class="flex items-center gap-2">
+
+          <a href="index.html"
+             class="px-3 py-2 rounded-lg bg-blue-700 font-medium">
+            🏠 Accueil
+          </a>
+
+          <a href="Depenses.html"
+             class="px-3 py-2 rounded-lg hover:bg-blue-700 transition">
+            💰 Dépenses
+          </a>
+
+          <a href="SIAD.html"
+             class="px-3 py-2 rounded-lg hover:bg-blue-700 transition">
+            📊 SIAD
+          </a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </nav>
+
+
+  <!-- ============================= -->
+  <!-- CONTENU PRINCIPAL -->
+  <!-- ============================= -->
+
+  <main class="max-w-6xl mx-auto px-4 py-8">
 
     <!-- En-tête -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-800">Suivi de Dépenses</h1>
-        <p class="text-gray-500">Tableau de bord SIAD • Jour / Semaine / Mois / Type</p>
-      </div>
-      <button onclick="ouvrirModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium shadow">
-        + Ajouter une dépense
-      </button>
+
+    <div class="mb-8">
+
+      <h1 class="text-3xl font-bold text-gray-800">
+        Suivi de mes dépenses
+      </h1>
+
+      <p class="text-gray-500 mt-2">
+        Système d'Information d'Aide à la Décision
+      </p>
+
     </div>
 
-    <!-- Résumé rapide -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+
+    <!-- ============================= -->
+    <!-- CARTES RAPIDES -->
+    <!-- ============================= -->
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+
+
+      <!-- Aujourd'hui -->
+
       <div class="bg-white rounded-xl shadow p-5 border-l-4 border-blue-500">
-        <p class="text-sm text-gray-500 mb-1">Aujourd'hui</p>
-        <p id="total-jour" class="text-2xl font-bold text-blue-600">0,000 DT</p>
+
+        <p class="text-sm text-gray-500">
+          Aujourd'hui
+        </p>
+
+        <p id="total-jour"
+           class="text-2xl font-bold text-blue-600 mt-2">
+          0,000 DT
+        </p>
+
       </div>
+
+
+      <!-- Semaine -->
+
       <div class="bg-white rounded-xl shadow p-5 border-l-4 border-green-500">
-        <p class="text-sm text-gray-500 mb-1">Semaine en cours</p>
-        <p id="total-semaine" class="text-2xl font-bold text-green-600">0,000 DT</p>
+
+        <p class="text-sm text-gray-500">
+          Cette semaine
+        </p>
+
+        <p id="total-semaine"
+           class="text-2xl font-bold text-green-600 mt-2">
+          0,000 DT
+        </p>
+
       </div>
+
+
+      <!-- Mois -->
+
       <div class="bg-white rounded-xl shadow p-5 border-l-4 border-purple-500">
-        <p class="text-sm text-gray-500 mb-1">Mois en cours</p>
-        <p id="total-mois" class="text-2xl font-bold text-purple-600">0,000 DT</p>
+
+        <p class="text-sm text-gray-500">
+          Ce mois
+        </p>
+
+        <p id="total-mois"
+           class="text-2xl font-bold text-purple-600 mt-2">
+          0,000 DT
+        </p>
+
       </div>
+
     </div>
 
-    <!-- Statistiques détaillées -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
 
-      <!-- Par Type -->
-      <div class="bg-white rounded-xl shadow p-5">
-        <h2 class="text-lg font-semibold mb-4">Statistiques par Type (Mois)</h2>
-        <canvas id="chartType" height="220"></canvas>
-        <div id="tableau-type" class="mt-4 text-sm space-y-1"></div>
+    <!-- ============================= -->
+    <!-- ACCÈS RAPIDES -->
+    <!-- ============================= -->
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+
+      <!-- Dépenses -->
+
+      <div class="bg-white rounded-xl shadow p-6">
+
+        <div class="text-4xl mb-4">
+          💰
+        </div>
+
+        <h2 class="text-xl font-bold text-gray-800 mb-2">
+          Gestion des dépenses
+        </h2>
+
+        <p class="text-gray-500 mb-5">
+          Ajouter, consulter, modifier et supprimer
+          vos dépenses.
+        </p>
+
+        <a href="Depenses.html"
+           class="inline-block bg-blue-600 hover:bg-blue-700
+                  text-white px-5 py-2.5 rounded-lg
+                  font-medium transition">
+
+          Ouvrir Dépenses →
+
+        </a>
+
       </div>
 
-      <!-- Par Jour -->
-      <div class="bg-white rounded-xl shadow p-5">
-        <h2 class="text-lg font-semibold mb-4">Statistiques par Jour (7 derniers jours)</h2>
-        <canvas id="chartJour" height="220"></canvas>
+
+      <!-- SIAD -->
+
+      <div class="bg-white rounded-xl shadow p-6">
+
+        <div class="text-4xl mb-4">
+          📊
+        </div>
+
+        <h2 class="text-xl font-bold text-gray-800 mb-2">
+          Tableau de bord SIAD
+        </h2>
+
+        <p class="text-gray-500 mb-5">
+          Analyser les dépenses par type,
+          jour, semaine et mois.
+        </p>
+
+        <a href="SIAD.html"
+           class="inline-block bg-purple-600 hover:bg-purple-700
+                  text-white px-5 py-2.5 rounded-lg
+                  font-medium transition">
+
+          Ouvrir le SIAD →
+
+        </a>
+
       </div>
 
-      <!-- Semaine en cours -->
-      <div class="bg-white rounded-xl shadow p-5">
-        <h2 class="text-lg font-semibold mb-4">Semaine en cours – Détail</h2>
-        <div id="detail-semaine" class="space-y-2 text-sm"></div>
-      </div>
-
-      <!-- Classement du mois -->
-      <div class="bg-white rounded-xl shadow p-5">
-        <h2 class="text-lg font-semibold mb-4">Mois en cours – Classement</h2>
-        <div id="classement-mois" class="space-y-2 text-sm"></div>
-      </div>
     </div>
 
-    <!-- Liste des dépenses -->
-    <div class="bg-white rounded-xl shadow p-5">
-      <h2 class="text-lg font-semibold mb-4">Dernières dépenses</h2>
-      <div id="liste-depenses" class="space-y-3 max-h-96 overflow-y-auto">
-        <p class="text-gray-400 text-sm">Chargement...</p>
+
+    <!-- ============================= -->
+    <!-- INFORMATIONS -->
+    <!-- ============================= -->
+
+    <div class="bg-white rounded-xl shadow p-6 mt-6">
+
+      <h2 class="text-lg font-semibold text-gray-800 mb-4">
+        📌 Organisation du système
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+
+        <div class="p-4 bg-blue-50 rounded-lg">
+
+          <div class="text-2xl mb-2">
+            🏠
+          </div>
+
+          <h3 class="font-semibold">
+            Accueil
+          </h3>
+
+          <p class="text-sm text-gray-500 mt-1">
+            Vue rapide de votre situation.
+          </p>
+
+        </div>
+
+
+        <div class="p-4 bg-green-50 rounded-lg">
+
+          <div class="text-2xl mb-2">
+            💰
+          </div>
+
+          <h3 class="font-semibold">
+            Dépenses
+          </h3>
+
+          <p class="text-sm text-gray-500 mt-1">
+            Saisie et gestion des dépenses.
+          </p>
+
+        </div>
+
+
+        <div class="p-4 bg-purple-50 rounded-lg">
+
+          <div class="text-2xl mb-2">
+            📊
+          </div>
+
+          <h3 class="font-semibold">
+            SIAD
+          </h3>
+
+          <p class="text-sm text-gray-500 mt-1">
+            Analyse et aide à la décision.
+          </p>
+
+        </div>
+
       </div>
+
     </div>
-  </div>
 
-  <!-- Modal d'ajout -->
-  <div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
-      <div class="flex justify-between items-center mb-5">
-        <h2 class="text-xl font-bold">Nouvelle dépense</h2>
-        <button onclick="fermerModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
-      </div>
+  </main>
 
-      <form id="form-depense" class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Montant (DT) *</label>
-          <input type="number" id="montant" step="0.001" min="0.001" required
-                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                 placeholder="2.200">
-        </div>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Date *</label>
-          <input type="date" id="date" required
-                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
-        </div>
+  <!-- ============================= -->
+  <!-- PIED DE PAGE -->
+  <!-- ============================= -->
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Catégorie *</label>
-          <select id="categorie" required onchange="gererAutres()"
-                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
-            <option value="">-- Choisir --</option>
-            <option value="Alimentation">Alimentation</option>
-            <option value="Café">Café</option>
-            <option value="Essence">Essence</option>
-            <option value="Enfant">Enfant</option>
-            <option value="Eau">Eau</option>
-            <option value="Communication">Communication</option>
-            <option value="Travail">Travail</option>
-            <option value="Bricolage">Bricolage</option>
-            <option value="Réparation">Réparation</option>
-            <option value="Habillements">Habillements</option>
-            <option value="Autres">Autres</option>
-          </select>
-        </div>
+  <footer class="text-center text-gray-400 text-sm py-6">
 
-        <div id="champ-autres" class="hidden">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Préciser (Autres) *</label>
-          <input type="text" id="precision-autres"
-                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                 placeholder="Ex: Cadeau, Pharmacie...">
-        </div>
+    MesDeps — Gestion des dépenses
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Description (optionnel)</label>
-          <input type="text" id="description"
-                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                 placeholder="Ex: Courses Carrefour">
-        </div>
+  </footer>
 
-        <div class="flex gap-3 pt-2">
-          <button type="button" onclick="fermerModal()" class="flex-1 border border-gray-300 py-2.5 rounded-lg hover:bg-gray-50">Annuler</button>
-          <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium">Enregistrer</button>
-        </div>
-      </form>
-    </div>
-  </div>
 
-  <!-- Script JS -->
-  <script src="script.js"></script>
 </body>
 </html>
