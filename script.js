@@ -1,6 +1,6 @@
 // ============================================================
 // MESDEPS - SCRIPT PRINCIPAL
-// Firebase + Firestore
+// Firebase Authentication + Firestore
 // ============================================================
 
 
@@ -9,19 +9,12 @@
 // ============================================================
 
 const firebaseConfig = {
-
   apiKey: "AIzaSyB6CTUcJWbwL8GK-65PCFS1z7HXtDKYWEo",
-
   authDomain: "mesdeps.firebaseapp.com",
-
   projectId: "mesdeps",
-
   storageBucket: "mesdeps.firebasestorage.app",
-
   messagingSenderId: "216030223679",
-
   appId: "1:216030223679:web:d6ee1c2aafd3f939c9078a"
-
 };
 
 
@@ -30,19 +23,10 @@ const firebaseConfig = {
 // ============================================================
 
 if (!firebase.apps.length) {
-
   firebase.initializeApp(firebaseConfig);
-
 }
 
-
-// Firestore
-
 const db = firebase.firestore();
-
-
-// Authentication
-
 const auth = firebase.auth();
 
 
@@ -57,71 +41,57 @@ let toutesLesDepenses = [];
 // 4. UTILITAIRES
 // ============================================================
 
-
-// ------------------------------------------------------------
 // Date du jour : YYYY-MM-DD
-// ------------------------------------------------------------
 
 function getToday() {
 
   const maintenant = new Date();
 
-  const annee =
-    maintenant.getFullYear();
+  const annee = maintenant.getFullYear();
 
-  const mois =
-    String(
-      maintenant.getMonth() + 1
-    ).padStart(2, "0");
+  const mois = String(
+    maintenant.getMonth() + 1
+  ).padStart(2, "0");
 
-  const jour =
-    String(
-      maintenant.getDate()
-    ).padStart(2, "0");
+  const jour = String(
+    maintenant.getDate()
+  ).padStart(2, "0");
 
   return `${annee}-${mois}-${jour}`;
-
 }
 
 
-// ------------------------------------------------------------
-// Format monétaire tunisien
-// ------------------------------------------------------------
+// ============================================================
+// FORMAT MONÉTAIRE
+// ============================================================
 
 function formatMoney(montant) {
 
-  const nombre =
-    Number(montant);
+  const nombre = Number(montant);
 
   if (isNaN(nombre)) {
-
     return "0,000 DT";
-
   }
 
   return nombre
     .toFixed(3)
     .replace(".", ",") + " DT";
-
 }
 
 
-// ------------------------------------------------------------
-// Format date
-// ------------------------------------------------------------
+// ============================================================
+// FORMAT DATE
+// ============================================================
 
 function formatDate(dateStr) {
 
   if (!dateStr) {
-
     return "";
-
   }
 
-  const date =
-    new Date(
-      dateStr + "T00:00:00"
-    );
+  const date = new Date(
+    dateStr + "T00:00:00"
+  );
 
   return date.toLocaleDateString(
     "fr-FR",
@@ -132,7 +102,6 @@ function formatDate(dateStr) {
       year: "numeric"
     }
   );
-
 }
 
 
@@ -146,37 +115,23 @@ function ouvrirModal() {
     document.getElementById("modal");
 
   if (!modal) {
-
     return;
-
   }
 
   const champDate =
     document.getElementById("date");
 
   if (champDate) {
-
-    champDate.value =
-      getToday();
-
+    champDate.value = getToday();
   }
 
-  modal.classList.remove(
-    "hidden"
-  );
+  modal.classList.remove("hidden");
 
-  modal.classList.add(
-    "flex"
-  );
+  modal.classList.add("flex");
 
   gererAutres();
-
 }
 
-
-// ------------------------------------------------------------
-// Fermer le modal
-// ------------------------------------------------------------
 
 function fermerModal() {
 
@@ -184,41 +139,25 @@ function fermerModal() {
     document.getElementById("modal");
 
   const formulaire =
-    document.getElementById(
-      "form-depense"
-    );
+    document.getElementById("form-depense");
 
   if (modal) {
 
-    modal.classList.add(
-      "hidden"
-    );
+    modal.classList.add("hidden");
 
-    modal.classList.remove(
-      "flex"
-    );
-
+    modal.classList.remove("flex");
   }
 
   if (formulaire) {
-
     formulaire.reset();
-
   }
 
   const champAutres =
-    document.getElementById(
-      "champ-autres"
-    );
+    document.getElementById("champ-autres");
 
   if (champAutres) {
-
-    champAutres.classList.add(
-      "hidden"
-    );
-
+    champAutres.classList.add("hidden");
   }
-
 }
 
 
@@ -229,124 +168,108 @@ function fermerModal() {
 function gererAutres() {
 
   const categorie =
-    document.getElementById(
-      "categorie"
-    );
+    document.getElementById("categorie");
 
   const champ =
-    document.getElementById(
-      "champ-autres"
-    );
+    document.getElementById("champ-autres");
 
   const precision =
-    document.getElementById(
-      "precision-autres"
-    );
+    document.getElementById("precision-autres");
 
   if (
     !categorie ||
     !champ ||
     !precision
   ) {
-
     return;
-
   }
 
-  if (
-    categorie.value === "Autres"
-  ) {
+  if (categorie.value === "Autres") {
 
-    champ.classList.remove(
-      "hidden"
-    );
+    champ.classList.remove("hidden");
 
-    precision.required =
-      true;
+    precision.required = true;
 
+  } else {
+
+    champ.classList.add("hidden");
+
+    precision.required = false;
+
+    precision.value = "";
   }
-
-  else {
-
-    champ.classList.add(
-      "hidden"
-    );
-
-    precision.required =
-      false;
-
-    precision.value =
-      "";
-
-  }
-
 }
 
 
 // ============================================================
-// 7. AJOUT D'UNE DÉPENSE
+// 7. AJOUT D'UNE DÉPENSE DANS FIRESTORE
 // ============================================================
 
 const formulaire =
-  document.getElementById(
-    "form-depense"
-  );
+  document.getElementById("form-depense");
 
 
 if (formulaire) {
 
   formulaire.addEventListener(
     "submit",
-    async function(e) {
+    async function (e) {
 
       e.preventDefault();
 
 
-      // ------------------------------------------------------
+      // ------------------------------------------
+      // Vérifier la connexion
+      // ------------------------------------------
+
+      const utilisateur =
+        auth.currentUser;
+
+      if (!utilisateur) {
+
+        alert(
+          "Vous devez être connecté pour enregistrer une dépense."
+        );
+
+        return;
+      }
+
+
+      // ------------------------------------------
       // Récupération des champs
-      // ------------------------------------------------------
+      // ------------------------------------------
 
       const montant =
         parseFloat(
-          document.getElementById(
-            "montant"
-          ).value
+          document.getElementById("montant").value
         );
 
 
       const date =
-        document.getElementById(
-          "date"
-        ).value;
+        document.getElementById("date").value;
 
 
       let categorie =
-        document.getElementById(
-          "categorie"
-        ).value;
+        document.getElementById("categorie").value;
 
 
       const precision =
         document
-          .getElementById(
-            "precision-autres"
-          )
+          .getElementById("precision-autres")
           .value
           .trim();
 
 
       const description =
         document
-          .getElementById(
-            "description"
-          )
+          .getElementById("description")
           .value
           .trim();
 
 
-      // ------------------------------------------------------
+      // ------------------------------------------
       // Vérifications
-      // ------------------------------------------------------
+      // ------------------------------------------
 
       if (
         !montant ||
@@ -358,7 +281,6 @@ if (formulaire) {
         );
 
         return;
-
       }
 
 
@@ -369,7 +291,6 @@ if (formulaire) {
         );
 
         return;
-
       }
 
 
@@ -380,17 +301,14 @@ if (formulaire) {
         );
 
         return;
-
       }
 
 
-      // ------------------------------------------------------
-      // Gestion de AUTRES
-      // ------------------------------------------------------
+      // ------------------------------------------
+      // Catégorie Autres
+      // ------------------------------------------
 
-      if (
-        categorie === "Autres"
-      ) {
+      if (categorie === "Autres") {
 
         if (!precision) {
 
@@ -399,19 +317,16 @@ if (formulaire) {
           );
 
           return;
-
         }
 
         categorie =
-          "Autres - " +
-          precision;
-
+          "Autres - " + precision;
       }
 
 
-      // ------------------------------------------------------
-      // ENREGISTREMENT FIRESTORE
-      // ------------------------------------------------------
+      // ------------------------------------------
+      // Enregistrement Firestore
+      // ------------------------------------------
 
       try {
 
@@ -419,17 +334,15 @@ if (formulaire) {
           .collection("depenses")
           .add({
 
-            montant:
-              montant,
+            montant: montant,
 
-            date:
-              date,
+            date: date,
 
-            categorie:
-              categorie,
+            categorie: categorie,
 
-            description:
-              description,
+            description: description,
+
+            userId: utilisateur.uid,
 
             createdAt:
               firebase.firestore
@@ -439,22 +352,17 @@ if (formulaire) {
           });
 
 
-        // Fermer le formulaire
-
-        fermerModal();
-
-
-        // Recharger les données
-
-        await chargerDepuisFirebase();
-
-
         alert(
           "Dépense enregistrée avec succès."
         );
 
-      }
 
+        fermerModal();
+
+
+        await chargerDepenses();
+
+      }
 
       catch (error) {
 
@@ -467,29 +375,36 @@ if (formulaire) {
           "Erreur lors de l'enregistrement :\n" +
           error.message
         );
-
       }
 
     }
   );
-
 }
 
 
 // ============================================================
-// 8. CHARGER LES DÉPENSES DEPUIS FIRESTORE
+// 8. CHARGEMENT DES DÉPENSES DEPUIS FIRESTORE
 // ============================================================
 
-async function chargerDepuisFirebase() {
+async function chargerDepenses() {
+
+  const utilisateur =
+    auth.currentUser;
+
+  if (!utilisateur) {
+    return;
+  }
+
 
   try {
 
     const snapshot =
       await db
         .collection("depenses")
-        .orderBy(
-          "date",
-          "desc"
+        .where(
+          "userId",
+          "==",
+          utilisateur.uid
         )
         .get();
 
@@ -498,16 +413,29 @@ async function chargerDepuisFirebase() {
 
 
     snapshot.forEach(
-      function(doc) {
+      function (doc) {
 
         toutesLesDepenses.push({
 
-          id:
-            doc.id,
+          id: doc.id,
 
           ...doc.data()
 
         });
+
+      }
+    );
+
+
+    // Tri par date décroissante
+
+    toutesLesDepenses.sort(
+      function (a, b) {
+
+        return String(b.date || "")
+          .localeCompare(
+            String(a.date || "")
+          );
 
       }
     );
@@ -524,11 +452,10 @@ async function chargerDepuisFirebase() {
 
   }
 
-
   catch (error) {
 
     console.error(
-      "Erreur chargement Firebase :",
+      "Erreur chargement Firestore :",
       error
     );
 
@@ -546,11 +473,8 @@ async function chargerDepuisFirebase() {
           ❌ Erreur lors du chargement des dépenses.
         </p>
       `;
-
     }
-
   }
-
 }
 
 
@@ -569,9 +493,7 @@ function afficherDepenses(
 
 
   if (!conteneur) {
-
     return;
-
   }
 
 
@@ -581,19 +503,22 @@ function afficherDepenses(
   ) {
 
     conteneur.innerHTML = `
+
       <p class="text-gray-400 text-sm">
+
         Aucune dépense enregistrée.
+
       </p>
+
     `;
 
     return;
-
   }
 
 
   conteneur.innerHTML =
     depenses.map(
-      function(d) {
+      function (d) {
 
         return `
 
@@ -619,9 +544,7 @@ function afficherDepenses(
               <p class="text-sm
                         text-gray-500">
 
-                ${formatDate(
-                  d.date
-                )}
+                ${formatDate(d.date)}
 
                 ${
                   d.description
@@ -650,7 +573,9 @@ function afficherDepenses(
 
 
               <button
+
                 onclick="supprimerDepense('${d.id}')"
+
                 class="text-xs
                        text-gray-400
                        hover:text-red-500
@@ -668,7 +593,6 @@ function afficherDepenses(
 
       }
     ).join("");
-
 }
 
 
@@ -706,12 +630,11 @@ function echapperHTML(
       /'/g,
       "&#039;"
     );
-
 }
 
 
 // ============================================================
-// 11. SUPPRIMER UNE DÉPENSE
+// 11. SUPPRESSION FIRESTORE
 // ============================================================
 
 async function supprimerDepense(
@@ -723,9 +646,7 @@ async function supprimerDepense(
       "Voulez-vous vraiment supprimer cette dépense ?"
     )
   ) {
-
     return;
-
   }
 
 
@@ -737,15 +658,14 @@ async function supprimerDepense(
       .delete();
 
 
-    await chargerDepuisFirebase();
+    await chargerDepenses();
 
   }
-
 
   catch (error) {
 
     console.error(
-      "Erreur suppression Firebase :",
+      "Erreur suppression :",
       error
     );
 
@@ -754,9 +674,7 @@ async function supprimerDepense(
       "Erreur lors de la suppression :\n" +
       error.message
     );
-
   }
-
 }
 
 
@@ -772,12 +690,11 @@ function mettreAJourResume(
 
 
   depenses.forEach(
-    function(d) {
+    function (d) {
 
-      total +=
-        Number(
-          d.montant || 0
-        );
+      total += Number(
+        d.montant || 0
+      );
 
     }
   );
@@ -815,7 +732,6 @@ function mettreAJourResume(
 
     elementNombre.textContent =
       nombre;
-
   }
 
 
@@ -823,7 +739,6 @@ function mettreAJourResume(
 
     elementTotal.textContent =
       formatMoney(total);
-
   }
 
 
@@ -831,14 +746,12 @@ function mettreAJourResume(
 
     elementMoyenne.textContent =
       formatMoney(moyenne);
-
   }
-
 }
 
 
 // ============================================================
-// 13. FILTRER
+// 13. FILTRES
 // ============================================================
 
 function appliquerFiltres() {
@@ -871,7 +784,7 @@ function appliquerFiltres() {
 
   const resultats =
     toutesLesDepenses.filter(
-      function(d) {
+      function (d) {
 
 
         // Date début
@@ -882,7 +795,6 @@ function appliquerFiltres() {
         ) {
 
           return false;
-
         }
 
 
@@ -894,7 +806,6 @@ function appliquerFiltres() {
         ) {
 
           return false;
-
         }
 
 
@@ -910,7 +821,6 @@ function appliquerFiltres() {
         ) {
 
           return false;
-
         }
 
 
@@ -918,7 +828,7 @@ function appliquerFiltres() {
 
         if (recherche) {
 
-          const texte =
+          const texte = (
 
             String(
               d.categorie || ""
@@ -928,21 +838,19 @@ function appliquerFiltres() {
 
             String(
               d.description || ""
-            );
+            )
+
+          ).toLowerCase();
 
 
           if (
-            !texte
-              .toLowerCase()
-              .includes(
-                recherche
-              )
+            !texte.includes(
+              recherche
+            )
           ) {
 
             return false;
-
           }
-
         }
 
 
@@ -960,7 +868,6 @@ function appliquerFiltres() {
   mettreAJourResume(
     resultats
   );
-
 }
 
 
@@ -995,30 +902,22 @@ function reinitialiserFiltres() {
 
 
   if (dateDebut) {
-
     dateDebut.value = "";
-
   }
 
 
   if (dateFin) {
-
     dateFin.value = "";
-
   }
 
 
   if (categorie) {
-
     categorie.value = "";
-
   }
 
 
   if (recherche) {
-
     recherche.value = "";
-
   }
 
 
@@ -1030,20 +929,55 @@ function reinitialiserFiltres() {
   mettreAJourResume(
     toutesLesDepenses
   );
-
 }
 
 
 // ============================================================
-// 15. DÉMARRAGE
+// 15. AUTHENTIFICATION
 // ============================================================
 
-if (
-  document.getElementById(
-    "liste-depenses"
-  )
-) {
+auth.onAuthStateChanged(
+  function (utilisateur) {
 
-  chargerDepuisFirebase();
+    if (utilisateur) {
 
-}
+      console.log(
+        "Utilisateur connecté :",
+        utilisateur.email
+      );
+
+
+      chargerDepenses();
+
+    }
+
+    else {
+
+      console.log(
+        "Aucun utilisateur connecté."
+      );
+
+
+      const liste =
+        document.getElementById(
+          "liste-depenses"
+        );
+
+
+      if (liste) {
+
+        liste.innerHTML = `
+
+          <p class="text-gray-500">
+
+            🔐 Veuillez vous connecter
+            pour accéder à vos dépenses.
+
+          </p>
+
+        `;
+      }
+    }
+
+  }
+);
