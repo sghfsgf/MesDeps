@@ -1,7 +1,7 @@
 // ============================================================
 // MESDEPS - SIAD
-// Tableau de bord et analyse des dépenses
-// Firebase + Firestore
+// Tableau de bord des dépenses
+// Firebase + Firestore + Chart.js
 // ============================================================
 
 
@@ -9,20 +9,13 @@
 // 1. CONFIGURATION FIREBASE
 // ============================================================
 
-const firebaseConfigSIAD = {
-
-  apiKey: "AIzaSyB6CTUcJWbwL8GK-65PCFS1z7HXtDKYWEo",
-
-  authDomain: "mesdeps.firebaseapp.com",
-
-  projectId: "mesdeps",
-
-  storageBucket: "mesdeps.firebasestorage.app",
-
-  messagingSenderId: "216030223679",
-
-  appId: "1:216030223679:web:d6ee1c2aafd3f939c9078a"
-
+const firebaseConfig = {
+    apiKey: "AIzaSyB6CTUcJWbwL8GK-65PCFS1z7HXtDKYWEo",
+    authDomain: "mesdeps.firebaseapp.com",
+    projectId: "mesdeps",
+    storageBucket: "mesdeps.firebasestorage.app",
+    messagingSenderId: "216030223679",
+    appId: "1:216030223679:web:d6ee1c2aafd3f939c9078a"
 };
 
 
@@ -31,11 +24,7 @@ const firebaseConfigSIAD = {
 // ============================================================
 
 if (!firebase.apps.length) {
-
-  firebase.initializeApp(
-    firebaseConfigSIAD
-  );
-
+    firebase.initializeApp(firebaseConfig);
 }
 
 const dbSIAD = firebase.firestore();
@@ -45,927 +34,1371 @@ const dbSIAD = firebase.firestore();
 // 3. VARIABLES
 // ============================================================
 
-let toutesLesDepensesSIAD = [];
+let depensesSIAD = [];
+
+let chartType = null;
+let chartJour = null;
+let chartSemaine = null;
+let chartMois = null;
 
 
 // ============================================================
 // 4. UTILITAIRES
 // ============================================================
 
-// ------------------------------------------------------------
-// Date du jour : YYYY-MM-DD
-// ------------------------------------------------------------
-
-function getTodaySIAD() {
-
-  const maintenant = new Date();
-
-  const annee =
-    maintenant.getFullYear();
-
-  const mois =
-    String(
-      maintenant.getMonth() + 1
-    ).padStart(2, "0");
-
-  const jour =
-    String(
-      maintenant.getDate()
-    ).padStart(2, "0");
-
-  return `${annee}-${mois}-${jour}`;
-
-}
-
-
-// ============================================================
-// FORMAT MONÉTAIRE
-// ============================================================
-
 function formatMoneySIAD(montant) {
 
-  const nombre =
-    Number(montant);
+    const nombre = Number(montant);
 
-  if (isNaN(nombre)) {
+    if (isNaN(nombre)) {
+        return "0,000 DT";
+    }
 
-    return "0,000 DT";
-
-  }
-
-  return (
-    nombre
-      .toFixed(3)
-      .replace(".", ",")
-    + " DT"
-  );
-
+    return nombre
+        .toFixed(3)
+        .replace(".", ",") + " DT";
 }
 
 
 // ============================================================
-// FORMAT DATE
+// DATE AU FORMAT YYYY-MM-DD
+// ============================================================
+
+function getDateAujourdHuiSIAD() {
+
+    const date = new Date();
+
+    const annee = date.getFullYear();
+
+    const mois = String(
+        date.getMonth() + 1
+    ).padStart(2, "0");
+
+    const jour = String(
+        date.getDate()
+    ).padStart(2, "0");
+
+    return `${annee}-${mois}-${jour}`;
+}
+
+
+// ============================================================
+// FORMAT DATE POUR AFFICHAGE
 // ============================================================
 
 function formatDateSIAD(dateStr) {
 
-  if (!dateStr) {
+    if (!dateStr) {
+        return "";
+    }
 
-    return "";
-
-  }
-
-  const date =
-    new Date(
-      dateStr + "T00:00:00"
+    const date = new Date(
+        dateStr + "T00:00:00"
     );
 
-  return date.toLocaleDateString(
-    "fr-FR",
-    {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric"
-    }
-  );
-
+    return date.toLocaleDateString(
+        "fr-FR"
+    );
 }
 
 
 // ============================================================
-// 5. CHARGER LES DÉPENSES FIRESTORE
+// ECHAPPER HTML
+// ============================================================
+
+function echapperHTMLSIAD(texte) {
+
+    return String(texte)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+// ============================================================
+// 5. CHARGER LES DEPENSES FIRESTORE
 // ============================================================
 
 async function chargerDepensesSIAD() {
 
-  try {
+    console.log("SIAD : chargement des dépenses...");
 
-    console.log(
-      "📊 Chargement des dépenses SIAD..."
-    );
+    try {
 
+        const snapshot = await dbSIAD
+            .collection("depenses")
+            .orderBy("date", "desc")
+            .get();
 
-    const snapshot =
-      await dbSIAD
-        .collection("depenses")
-        .orderBy(
-          "date",
-          "desc"
-        )
-        .get();
+        depensesSIAD = [];
 
+        snapshot.forEach(function(doc) {
 
-    toutesLesDepensesSIAD = [];
-
-
-    snapshot.forEach(
-      function(doc) {
-
-        toutesLesDepensesSIAD.push({
-
-          id: doc.id,
-
-          ...doc.data()
+            depensesSIAD.push({
+                id: doc.id,
+                ...doc.data()
+            });
 
         });
 
-      }
-    );
+        console.log(
+            "SIAD : dépenses chargées =",
+            depensesSIAD.length
+        );
+
+        console.log(
+            "SIAD : données =",
+            depensesSIAD
+        );
 
 
-    console.log(
-      "✅ Dépenses récupérées :",
-      toutesLesDepensesSIAD.length
-    );
+        // Afficher les indicateurs
+        calculerIndicateurs();
 
 
-    // --------------------------------------------------------
-    // Calculs
-    // --------------------------------------------------------
-
-    mettreAJourIndicateursPrincipaux();
+        // Afficher les graphiques
+        analyserPeriode();
 
 
-    analyserDonnees(
-      toutesLesDepensesSIAD
-    );
+    }
+    catch (error) {
 
+        console.error(
+            "Erreur chargement SIAD :",
+            error
+        );
 
-  }
+        alert(
+            "❌ Impossible de charger les dépenses du SIAD.\n\n" +
+            error.message
+        );
 
-  catch (error) {
-
-    console.error(
-      "❌ Erreur chargement SIAD :",
-      error
-    );
-
-
-    afficherErreurSIAD(
-      error.message
-    );
-
-  }
+    }
 
 }
 
 
 // ============================================================
-// 6. INDICATEURS JOUR / SEMAINE / MOIS / ANNÉE
+// 6. CALCUL DES TOTAUX
 // ============================================================
 
-function mettreAJourIndicateursPrincipaux() {
+function calculerIndicateurs() {
 
-  const aujourdHui =
-    getTodaySIAD();
+    const aujourdHui =
+        getDateAujourdHuiSIAD();
 
-
-  const maintenant =
-    new Date();
-
-
-  const anneeActuelle =
-    maintenant.getFullYear();
+    const maintenant =
+        new Date();
 
 
-  const moisActuel =
-    String(
-      maintenant.getMonth() + 1
-    ).padStart(2, "0");
+    // --------------------------------------------------------
+    // DEBUT DE LA SEMAINE
+    // --------------------------------------------------------
 
+    const debutSemaine =
+        new Date(maintenant);
 
-  // ----------------------------------------------------------
-  // Début de semaine
-  // Lundi = premier jour
-  // ----------------------------------------------------------
+    const jourSemaine =
+        maintenant.getDay();
 
-  const debutSemaine =
-    new Date(
-      maintenant
+    const difference =
+        jourSemaine === 0
+            ? 6
+            : jourSemaine - 1;
+
+    debutSemaine.setDate(
+        maintenant.getDate() - difference
+    );
+
+    debutSemaine.setHours(
+        0, 0, 0, 0
     );
 
 
-  const jourSemaine =
-    maintenant.getDay();
+    // --------------------------------------------------------
+    // DEBUT DU MOIS
+    // --------------------------------------------------------
 
-
-  const difference =
-    jourSemaine === 0
-      ? 6
-      : jourSemaine - 1;
-
-
-  debutSemaine.setDate(
-    maintenant.getDate() -
-    difference
-  );
-
-
-  const dateDebutSemaine =
-    convertirDateISO(
-      debutSemaine
-    );
-
-
-  // ----------------------------------------------------------
-  // Calculs
-  // ----------------------------------------------------------
-
-  let totalJour = 0;
-
-  let totalSemaine = 0;
-
-  let totalMois = 0;
-
-  let totalAnnee = 0;
-
-
-  toutesLesDepensesSIAD.forEach(
-    function(d) {
-
-      const montant =
-        Number(
-          d.montant || 0
+    const debutMois =
+        new Date(
+            maintenant.getFullYear(),
+            maintenant.getMonth(),
+            1
         );
 
 
-      const date =
-        d.date || "";
+    // --------------------------------------------------------
+    // DEBUT DE L'ANNEE
+    // --------------------------------------------------------
 
-
-      // Aujourd'hui
-
-      if (
-        date === aujourdHui
-      ) {
-
-        totalJour += montant;
-
-      }
-
-
-      // Cette semaine
-
-      if (
-        date >= dateDebutSemaine &&
-        date <= aujourdHui
-      ) {
-
-        totalSemaine += montant;
-
-      }
-
-
-      // Ce mois
-
-      if (
-        date.startsWith(
-          `${anneeActuelle}-${moisActuel}`
-        )
-      ) {
-
-        totalMois += montant;
-
-      }
-
-
-      // Cette année
-
-      if (
-        date.startsWith(
-          String(anneeActuelle)
-        )
-      ) {
-
-        totalAnnee += montant;
-
-      }
-
-    }
-  );
-
-
-  // ----------------------------------------------------------
-  // Affichage
-  // ----------------------------------------------------------
-
-  afficherTexte(
-    "siad-total-jour",
-    formatMoneySIAD(
-      totalJour
-    )
-  );
-
-
-  afficherTexte(
-    "siad-total-semaine",
-    formatMoneySIAD(
-      totalSemaine
-    )
-  );
-
-
-  afficherTexte(
-    "siad-total-mois",
-    formatMoneySIAD(
-      totalMois
-    )
-  );
-
-
-  afficherTexte(
-    "siad-total-annee",
-    formatMoneySIAD(
-      totalAnnee
-    );
-
-}
-
-
-// ============================================================
-// 7. ANALYSE GÉNÉRALE
-// ============================================================
-
-function analyserDonnees(
-  depenses
-) {
-
-  if (
-    !depenses ||
-    depenses.length === 0
-  ) {
-
-    afficherTexte(
-      "siad-poste-principal",
-      "-"
-    );
-
-
-    afficherTexte(
-      "siad-max",
-      "0,000 DT"
-    );
-
-
-    afficherTexte(
-      "siad-moyenne",
-      "0,000 DT"
-    );
-
-
-    afficherTexte(
-      "siad-nombre",
-      "0"
-    );
-
-
-    afficherTableauVide();
-
-    return;
-
-  }
-
-
-  // ----------------------------------------------------------
-  // Total
-  // ----------------------------------------------------------
-
-  let total = 0;
-
-
-  // ----------------------------------------------------------
-  // Plus grosse dépense
-  // ----------------------------------------------------------
-
-  let maximum = 0;
-
-  let depenseMaximum = null;
-
-
-  // ----------------------------------------------------------
-  // Catégories
-  // ----------------------------------------------------------
-
-  const categories = {};
-
-
-  depenses.forEach(
-    function(d) {
-
-      const montant =
-        Number(
-          d.montant || 0
+    const debutAnnee =
+        new Date(
+            maintenant.getFullYear(),
+            0,
+            1
         );
 
 
-      const categorie =
-        d.categorie ||
-        "Sans catégorie";
+    let totalJour = 0;
+    let totalSemaine = 0;
+    let totalMois = 0;
+    let totalAnnee = 0;
 
 
-      total += montant;
+    depensesSIAD.forEach(function(d) {
+
+        const montant =
+            Number(d.montant || 0);
+
+        const dateDepense =
+            new Date(
+                d.date + "T00:00:00"
+            );
 
 
-      // Maximum
+        if (d.date === aujourdHui) {
 
-      if (
-        montant > maximum
-      ) {
-
-        maximum =
-          montant;
-
-        depenseMaximum =
-          d;
-
-      }
-
-
-      // Catégorie
-
-      if (
-        !categories[categorie]
-      ) {
-
-        categories[categorie] = 0;
-
-      }
-
-
-      categories[categorie]
-        += montant;
-
-    }
-  );
-
-
-  // ----------------------------------------------------------
-  // Poste principal
-  // ----------------------------------------------------------
-
-  let postePrincipal = "-";
-
-  let montantPostePrincipal = 0;
-
-
-  Object.keys(categories)
-    .forEach(
-      function(categorie) {
-
-        if (
-          categories[categorie] >
-          montantPostePrincipal
-        ) {
-
-          montantPostePrincipal =
-            categories[categorie];
-
-          postePrincipal =
-            categorie;
+            totalJour += montant;
 
         }
 
-      }
-    );
+
+        if (
+            dateDepense >= debutSemaine
+        ) {
+
+            totalSemaine += montant;
+
+        }
 
 
-  // ----------------------------------------------------------
-  // Moyenne
-  // ----------------------------------------------------------
+        if (
+            dateDepense >= debutMois
+        ) {
 
-  const moyenne =
-    depenses.length > 0
-      ? total / depenses.length
-      : 0;
+            totalMois += montant;
 
-
-  // ----------------------------------------------------------
-  // Affichage
-  // ----------------------------------------------------------
-
-  afficherTexte(
-    "siad-poste-principal",
-
-    postePrincipal
-    + " — "
-    + formatMoneySIAD(
-        montantPostePrincipal
-      )
-  );
+        }
 
 
-  afficherTexte(
-    "siad-max",
+        if (
+            dateDepense >= debutAnnee
+        ) {
 
-    formatMoneySIAD(
-      maximum
-    )
-  );
+            totalAnnee += montant;
 
+        }
 
-  afficherTexte(
-    "siad-moyenne",
-
-    formatMoneySIAD(
-      moyenne
-    )
-  );
+    });
 
 
-  afficherTexte(
-    "siad-nombre",
+    // --------------------------------------------------------
+    // AFFICHAGE
+    // --------------------------------------------------------
 
-    String(
-      depenses.length
-    )
-  );
+    const elementJour =
+        document.getElementById(
+            "siad-total-jour"
+        );
 
+    const elementSemaine =
+        document.getElementById(
+            "siad-total-semaine"
+        );
 
-  // ----------------------------------------------------------
-  // Tableau par type
-  // ----------------------------------------------------------
+    const elementMois =
+        document.getElementById(
+            "siad-total-mois"
+        );
 
-  afficherTableauType(
-    categories,
-    total
-  );
-
-}
-
-
-// ============================================================
-// 8. TABLEAU PAR CATÉGORIE
-// ============================================================
-
-function afficherTableauType(
-  categories,
-  totalGeneral
-) {
-
-  const conteneur =
-    document.getElementById(
-      "tableau-type"
-    );
+    const elementAnnee =
+        document.getElementById(
+            "siad-total-annee"
+        );
 
 
-  if (!conteneur) {
+    if (elementJour) {
 
-    return;
+        elementJour.textContent =
+            formatMoneySIAD(totalJour);
 
-  }
-
-
-  const liste =
-    Object.entries(
-      categories
-    )
-    .sort(
-      function(a, b) {
-
-        return b[1] - a[1];
-
-      }
-    );
+    }
 
 
-  if (
-    liste.length === 0
-  ) {
+    if (elementSemaine) {
 
-    conteneur.innerHTML = `
-      <p class="text-gray-400">
-        Aucune donnée.
-      </p>
-    `;
+        elementSemaine.textContent =
+            formatMoneySIAD(totalSemaine);
 
-    return;
-
-  }
+    }
 
 
-  conteneur.innerHTML =
-    liste.map(
-      function([categorie, montant]) {
+    if (elementMois) {
 
-        const pourcentage =
-          totalGeneral > 0
-            ? (
-                montant /
-                totalGeneral *
-                100
-              )
-              .toFixed(1)
-            : 0;
+        elementMois.textContent =
+            formatMoneySIAD(totalMois);
+
+    }
 
 
-        return `
+    if (elementAnnee) {
 
-          <div
-            class="flex justify-between
-                   items-center
-                   border-b
-                   border-gray-100
-                   pb-2">
+        elementAnnee.textContent =
+            formatMoneySIAD(totalAnnee);
 
-            <div>
-
-              <p class="font-medium
-                        text-gray-700">
-
-                ${echapperHTMLSIAD(
-                  categorie
-                )}
-
-              </p>
-
-              <p class="text-xs
-                        text-gray-400">
-
-                ${pourcentage} %
-
-              </p>
-
-            </div>
-
-
-            <p class="font-semibold
-                      text-blue-600">
-
-              ${formatMoneySIAD(
-                montant
-              )}
-
-            </p>
-
-          </div>
-
-        `;
-
-      }
-    )
-    .join("");
+    }
 
 }
 
 
 // ============================================================
-// 9. ANALYSER UNE PÉRIODE
+// 7. ANALYSER UNE PERIODE
 // ============================================================
 
 function analyserPeriode() {
 
-  const dateDebut =
-    document.getElementById(
-      "siad-date-debut"
-    )?.value || "";
+    let dateDebut =
+        document.getElementById(
+            "siad-date-debut"
+        )?.value || "";
+
+    let dateFin =
+        document.getElementById(
+            "siad-date-fin"
+        )?.value || "";
 
 
-  const dateFin =
-    document.getElementById(
-      "siad-date-fin"
-    )?.value || "";
+    // --------------------------------------------------------
+    // Si aucune période n'est choisie
+    // utiliser toutes les dépenses
+    // --------------------------------------------------------
+
+    let resultats =
+        depensesSIAD.slice();
 
 
-  if (
-    dateDebut &&
-    dateFin &&
-    dateDebut > dateFin
-  ) {
+    // --------------------------------------------------------
+    // Filtre date début
+    // --------------------------------------------------------
 
-    alert(
-      "❌ La date début doit être antérieure à la date fin."
+    if (dateDebut) {
+
+        resultats =
+            resultats.filter(function(d) {
+
+                return d.date >= dateDebut;
+
+            });
+
+    }
+
+
+    // --------------------------------------------------------
+    // Filtre date fin
+    // --------------------------------------------------------
+
+    if (dateFin) {
+
+        resultats =
+            resultats.filter(function(d) {
+
+                return d.date <= dateFin;
+
+            });
+
+    }
+
+
+    // --------------------------------------------------------
+    // Vérifier période
+    // --------------------------------------------------------
+
+    if (
+        dateDebut &&
+        dateFin &&
+        dateDebut > dateFin
+    ) {
+
+        alert(
+            "❌ La date début doit être avant la date fin."
+        );
+
+        return;
+
+    }
+
+
+    console.log(
+        "SIAD : période analysée",
+        resultats
     );
 
-    return;
 
-  }
-
-
-  let resultat =
-    toutesLesDepensesSIAD;
+    afficherIndicateursPeriode(
+        resultats
+    );
 
 
-  if (dateDebut) {
+    afficherParType(
+        resultats
+    );
 
-    resultat =
-      resultat.filter(
-        function(d) {
 
-          return d.date >= dateDebut;
+    afficherParJour(
+        resultats
+    );
+
+
+    afficherParSemaine(
+        resultats
+    );
+
+
+    afficherParMois(
+        resultats
+    );
+
+}
+
+
+// ============================================================
+// 8. INDICATEURS DE LA PERIODE
+// ============================================================
+
+function afficherIndicateursPeriode(
+    depenses
+) {
+
+    let total = 0;
+
+    let maximum = 0;
+
+    let categorieMaximum = "-";
+
+
+    depenses.forEach(function(d) {
+
+        const montant =
+            Number(d.montant || 0);
+
+        total += montant;
+
+
+        if (montant > maximum) {
+
+            maximum = montant;
+
+            categorieMaximum =
+                d.categorie ||
+                "Sans catégorie";
 
         }
-      );
 
-  }
+    });
 
 
-  if (dateFin) {
+    const nombre =
+        depenses.length;
 
-    resultat =
-      resultat.filter(
-        function(d) {
 
-          return d.date <= dateFin;
+    const moyenne =
+        nombre > 0
+            ? total / nombre
+            : 0;
+
+
+    // --------------------------------------------------------
+    // Catégorie principale
+    // --------------------------------------------------------
+
+    const totauxCategories = {};
+
+
+    depenses.forEach(function(d) {
+
+        const categorie =
+            d.categorie ||
+            "Sans catégorie";
+
+        const montant =
+            Number(d.montant || 0);
+
+
+        if (
+            !totauxCategories[categorie]
+        ) {
+
+            totauxCategories[categorie] = 0;
 
         }
-      );
-
-  }
 
 
-  analyserDonnees(
-    resultat
-  );
+        totauxCategories[categorie] +=
+            montant;
+
+    });
+
+
+    let postePrincipal = "-";
+
+    let montantPostePrincipal = 0;
+
+
+    Object.keys(
+        totauxCategories
+    ).forEach(function(categorie) {
+
+        if (
+            totauxCategories[categorie]
+            >
+            montantPostePrincipal
+        ) {
+
+            montantPostePrincipal =
+                totauxCategories[categorie];
+
+            postePrincipal =
+                categorie;
+
+        }
+
+    });
+
+
+    // --------------------------------------------------------
+    // Affichage
+    // --------------------------------------------------------
+
+    const elementPoste =
+        document.getElementById(
+            "siad-poste-principal"
+        );
+
+    const elementMax =
+        document.getElementById(
+            "siad-max"
+        );
+
+    const elementMoyenne =
+        document.getElementById(
+            "siad-moyenne"
+        );
+
+    const elementNombre =
+        document.getElementById(
+            "siad-nombre"
+        );
+
+
+    if (elementPoste) {
+
+        elementPoste.textContent =
+            postePrincipal;
+
+    }
+
+
+    if (elementMax) {
+
+        elementMax.textContent =
+            formatMoneySIAD(maximum);
+
+    }
+
+
+    if (elementMoyenne) {
+
+        elementMoyenne.textContent =
+            formatMoneySIAD(moyenne);
+
+    }
+
+
+    if (elementNombre) {
+
+        elementNombre.textContent =
+            nombre;
+
+    }
 
 }
 
 
 // ============================================================
-// 10. AFFICHER UN TEXTE
+// 9. DEPENSES PAR TYPE
 // ============================================================
 
-function afficherTexte(
-  id,
-  texte
+function afficherParType(
+    depenses
 ) {
 
-  const element =
-    document.getElementById(id);
+    const totaux = {};
 
 
-  if (element) {
+    depenses.forEach(function(d) {
 
-    element.textContent =
-      texte;
+        const categorie =
+            d.categorie ||
+            "Sans catégorie";
 
-  }
+        const montant =
+            Number(d.montant || 0);
+
+
+        if (!totaux[categorie]) {
+
+            totaux[categorie] = 0;
+
+        }
+
+
+        totaux[categorie] +=
+            montant;
+
+    });
+
+
+    const categories =
+        Object.keys(totaux);
+
+
+    const valeurs =
+        categories.map(function(categorie) {
+
+            return totaux[categorie];
+
+        });
+
+
+    // --------------------------------------------------------
+    // Graphique
+    // --------------------------------------------------------
+
+    const canvas =
+        document.getElementById(
+            "chartType"
+        );
+
+
+    if (canvas) {
+
+        if (chartType) {
+
+            chartType.destroy();
+
+        }
+
+
+        chartType =
+            new Chart(
+                canvas,
+                {
+                    type: "doughnut",
+
+                    data: {
+
+                        labels:
+                            categories,
+
+                        datasets: [
+
+                            {
+                                data:
+                                    valeurs
+                            }
+
+                        ]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        plugins: {
+
+                            legend: {
+
+                                position:
+                                    "bottom"
+
+                            }
+
+                        }
+
+                    }
+
+                }
+            );
+
+    }
+
+
+    // --------------------------------------------------------
+    // Tableau
+    // --------------------------------------------------------
+
+    const tableau =
+        document.getElementById(
+            "tableau-type"
+        );
+
+
+    if (!tableau) {
+
+        return;
+
+    }
+
+
+    if (
+        categories.length === 0
+    ) {
+
+        tableau.innerHTML = `
+            <p class="text-gray-400">
+                Aucune dépense.
+            </p>
+        `;
+
+        return;
+
+    }
+
+
+    const total =
+        valeurs.reduce(
+            function(a, b) {
+                return a + b;
+            },
+            0
+        );
+
+
+    tableau.innerHTML =
+        categories
+            .sort(function(a, b) {
+
+                return (
+                    totaux[b] -
+                    totaux[a]
+                );
+
+            })
+            .map(function(categorie) {
+
+                const montant =
+                    totaux[categorie];
+
+
+                const pourcentage =
+                    total > 0
+                        ? (
+                            montant /
+                            total *
+                            100
+                        )
+                        : 0;
+
+
+                return `
+
+                    <div
+                        class="flex justify-between
+                               items-center
+                               border-b
+                               border-gray-100
+                               py-2">
+
+                        <span>
+                            ${echapperHTMLSIAD(
+                                categorie
+                            )}
+                        </span>
+
+                        <span
+                            class="font-semibold">
+
+                            ${formatMoneySIAD(
+                                montant
+                            )}
+
+                            <span
+                                class="text-xs
+                                       text-gray-400">
+
+                                (${pourcentage.toFixed(1)}%)
+
+                            </span>
+
+                        </span>
+
+                    </div>
+
+                `;
+
+            })
+            .join("");
 
 }
 
 
 // ============================================================
-// 11. CONVERTIR DATE EN YYYY-MM-DD
+// 10. DEPENSES PAR JOUR
 // ============================================================
 
-function convertirDateISO(
-  date
+function afficherParJour(
+    depenses
 ) {
 
-  const annee =
-    date.getFullYear();
+    const totaux = {};
 
 
-  const mois =
-    String(
-      date.getMonth() + 1
-    ).padStart(2, "0");
+    depenses.forEach(function(d) {
+
+        const date =
+            d.date;
+
+        const montant =
+            Number(d.montant || 0);
 
 
-  const jour =
-    String(
-      date.getDate()
-    ).padStart(2, "0");
+        if (!totaux[date]) {
+
+            totaux[date] = 0;
+
+        }
 
 
-  return (
-    annee +
-    "-" +
-    mois +
-    "-" +
-    jour
-  );
+        totaux[date] += montant;
+
+    });
+
+
+    const dates =
+        Object.keys(totaux)
+            .sort();
+
+
+    const valeurs =
+        dates.map(function(date) {
+
+            return totaux[date];
+
+        });
+
+
+    const canvas =
+        document.getElementById(
+            "chartJour"
+        );
+
+
+    if (canvas) {
+
+        if (chartJour) {
+
+            chartJour.destroy();
+
+        }
+
+
+        chartJour =
+            new Chart(
+                canvas,
+                {
+                    type: "line",
+
+                    data: {
+
+                        labels:
+                            dates.map(
+                                function(date) {
+                                    return formatDateSIAD(
+                                        date
+                                    );
+                                }
+                            ),
+
+                        datasets: [
+
+                            {
+
+                                label:
+                                    "Dépenses",
+
+                                data:
+                                    valeurs,
+
+                                tension:
+                                    0.3,
+
+                                fill:
+                                    true
+
+                            }
+
+                        ]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        scales: {
+
+                            y: {
+
+                                beginAtZero:
+                                    true
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            );
+
+    }
+
+
+    const tableau =
+        document.getElementById(
+            "tableau-jour"
+        );
+
+
+    if (tableau) {
+
+        tableau.innerHTML =
+            dates.map(function(date) {
+
+                return `
+
+                    <div
+                        class="flex justify-between
+                               border-b
+                               border-gray-100
+                               py-2">
+
+                        <span>
+                            ${formatDateSIAD(
+                                date
+                            )}
+                        </span>
+
+                        <strong>
+                            ${formatMoneySIAD(
+                                totaux[date]
+                            )}
+                        </strong>
+
+                    </div>
+
+                `;
+
+            }).join("");
+
+    }
 
 }
 
 
 // ============================================================
-// 12. PROTECTION HTML
+// 11. DEPENSES PAR SEMAINE
 // ============================================================
 
-function echapperHTMLSIAD(
-  texte
+function getNumeroSemaine(
+    dateStr
 ) {
 
-  return String(texte)
+    const date =
+        new Date(
+            dateStr + "T00:00:00"
+        );
 
-    .replace(
-      /&/g,
-      "&amp;"
-    )
 
-    .replace(
-      /</g,
-      "&lt;"
-    )
+    const debutAnnee =
+        new Date(
+            date.getFullYear(),
+            0,
+            1
+        );
 
-    .replace(
-      />/g,
-      "&gt;"
-    )
 
-    .replace(
-      /"/g,
-      "&quot;"
-    )
+    const difference =
+        Math.floor(
+            (
+                date -
+                debutAnnee
+            ) /
+            86400000
+        );
 
-    .replace(
-      /'/g,
-      "&#039;"
+
+    return Math.ceil(
+        (
+            difference +
+            debutAnnee.getDay() +
+            1
+        ) / 7
     );
 
 }
 
 
-// ============================================================
-// 13. TABLEAU VIDE
-// ============================================================
-
-function afficherTableauVide() {
-
-  const tableau =
-    document.getElementById(
-      "tableau-type"
-    );
-
-
-  if (tableau) {
-
-    tableau.innerHTML = `
-      <p class="text-gray-400">
-        Aucune dépense enregistrée.
-      </p>
-    `;
-
-  }
-
-}
-
-
-// ============================================================
-// 14. ERREUR
-// ============================================================
-
-function afficherErreurSIAD(
-  message
+function afficherParSemaine(
+    depenses
 ) {
 
-  const tableau =
-    document.getElementById(
-      "tableau-type"
-    );
+    const totaux = {};
 
 
-  if (tableau) {
+    depenses.forEach(function(d) {
 
-    tableau.innerHTML = `
+        const date =
+            new Date(
+                d.date + "T00:00:00"
+            );
 
-      <div
-        class="bg-red-50
-               text-red-600
-               rounded-lg
-               p-4">
 
-        ❌ Impossible de charger
-        les dépenses.
+        const annee =
+            date.getFullYear();
 
-        <br><br>
 
-        <small>
+        const semaine =
+            getNumeroSemaine(
+                d.date
+            );
 
-          ${echapperHTMLSIAD(
-            message
-          )}
 
-        </small>
+        const cle =
+            `${annee}-S${String(
+                semaine
+            ).padStart(2, "0")}`;
 
-      </div>
 
-    `;
+        const montant =
+            Number(d.montant || 0);
 
-  }
+
+        if (!totaux[cle]) {
+
+            totaux[cle] = 0;
+
+        }
+
+
+        totaux[cle] +=
+            montant;
+
+    });
+
+
+    const semaines =
+        Object.keys(totaux)
+            .sort();
+
+
+    const valeurs =
+        semaines.map(function(semaine) {
+
+            return totaux[semaine];
+
+        });
+
+
+    const canvas =
+        document.getElementById(
+            "chartSemaine"
+        );
+
+
+    if (canvas) {
+
+        if (chartSemaine) {
+
+            chartSemaine.destroy();
+
+        }
+
+
+        chartSemaine =
+            new Chart(
+                canvas,
+                {
+                    type: "bar",
+
+                    data: {
+
+                        labels:
+                            semaines,
+
+                        datasets: [
+
+                            {
+
+                                label:
+                                    "Dépenses",
+
+                                data:
+                                    valeurs
+
+                            }
+
+                        ]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        scales: {
+
+                            y: {
+
+                                beginAtZero:
+                                    true
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            );
+
+    }
+
+
+    const tableau =
+        document.getElementById(
+            "tableau-semaine"
+        );
+
+
+    if (tableau) {
+
+        tableau.innerHTML =
+            semaines.map(function(semaine) {
+
+                return `
+
+                    <div
+                        class="flex justify-between
+                               border-b
+                               border-gray-100
+                               py-2">
+
+                        <span>
+                            ${semaine}
+                        </span>
+
+                        <strong>
+                            ${formatMoneySIAD(
+                                totaux[semaine]
+                            )}
+                        </strong>
+
+                    </div>
+
+                `;
+
+            }).join("");
+
+    }
 
 }
 
 
 // ============================================================
-// 15. DÉMARRAGE DU SIAD
+// 12. DEPENSES PAR MOIS
+// ============================================================
+
+function afficherParMois(
+    depenses
+) {
+
+    const totaux = {};
+
+
+    depenses.forEach(function(d) {
+
+        const date =
+            new Date(
+                d.date + "T00:00:00"
+            );
+
+
+        const cle =
+            `${date.getFullYear()}-${String(
+                date.getMonth() + 1
+            ).padStart(2, "0")}`;
+
+
+        const montant =
+            Number(d.montant || 0);
+
+
+        if (!totaux[cle]) {
+
+            totaux[cle] = 0;
+
+        }
+
+
+        totaux[cle] +=
+            montant;
+
+    });
+
+
+    const mois =
+        Object.keys(totaux)
+            .sort();
+
+
+    const valeurs =
+        mois.map(function(m) {
+
+            return totaux[m];
+
+        });
+
+
+    const canvas =
+        document.getElementById(
+            "chartMois"
+        );
+
+
+    if (canvas) {
+
+        if (chartMois) {
+
+            chartMois.destroy();
+
+        }
+
+
+        chartMois =
+            new Chart(
+                canvas,
+                {
+                    type: "bar",
+
+                    data: {
+
+                        labels:
+                            mois,
+
+                        datasets: [
+
+                            {
+
+                                label:
+                                    "Dépenses",
+
+                                data:
+                                    valeurs
+
+                            }
+
+                        ]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        scales: {
+
+                            y: {
+
+                                beginAtZero:
+                                    true
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            );
+
+    }
+
+
+    const tableau =
+        document.getElementById(
+            "tableau-mois"
+        );
+
+
+    if (tableau) {
+
+        tableau.innerHTML =
+            mois.map(function(m) {
+
+                return `
+
+                    <div
+                        class="flex justify-between
+                               border-b
+                               border-gray-100
+                               py-2">
+
+                        <span>
+                            ${m}
+                        </span>
+
+                        <strong>
+                            ${formatMoneySIAD(
+                                totaux[m]
+                            )}
+                        </strong>
+
+                    </div>
+
+                `;
+
+            }).join("");
+
+    }
+
+}
+
+
+// ============================================================
+// 13. INITIALISATION
 // ============================================================
 
 document.addEventListener(
-  "DOMContentLoaded",
-  function() {
+    "DOMContentLoaded",
+    function() {
 
-    console.log(
-      "📊 SIAD démarré..."
-    );
+        console.log(
+            "SIAD : initialisation..."
+        );
 
+        chargerDepensesSIAD();
 
-    chargerDepensesSIAD();
-
-  }
+    }
 );
 
 
 // ============================================================
-// FIN SIAD
+// FIN
 // ============================================================
