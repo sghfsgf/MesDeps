@@ -10,759 +10,754 @@
 
   <title>MesDeps - Dépenses</title>
 
-  <!-- Tailwind CSS -->
+  <!-- ==================================================
+       TAILWIND CSS
+       ================================================== -->
+
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Firebase -->
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <!-- ==================================================
+       FIREBASE
+       ================================================== -->
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-<!-- CSS -->
 
-<link rel="stylesheet" href="style.css">
+  <!-- ==================================================
+       CSS PERSONNALISÉ
+       ================================================== -->
+
+  <link rel="stylesheet" href="style.css">
 
 </head>
 
+
 <body class="bg-gray-100 min-h-screen">
 
-  <!-- ============================================================
-       CONNEXION UTILISATEUR
-       ============================================================ -->
 
-  <div id="zone-connexion"
-       class="max-w-md mx-auto mt-8 mb-6 bg-white rounded-xl shadow p-6">
+  <!-- ==================================================
+       MENU PRINCIPAL
+       ================================================== -->
 
-    <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">
-      🔐 Connexion à MesDeps
-    </h2>
+  <nav class="bg-blue-600 text-white shadow-md">
 
-    <div class="space-y-4">
+    <div class="max-w-6xl mx-auto px-4">
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Adresse e-mail
-        </label>
+      <div class="flex items-center justify-between h-16">
 
-        <input
-          type="email"
-          id="email-connexion"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2"
-          placeholder="votre@email.com"
-          autocomplete="email">
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Mot de passe
-        </label>
-
-        <input
-          type="password"
-          id="mot-de-passe-connexion"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2"
-          placeholder="Votre mot de passe"
-          autocomplete="current-password">
-      </div>
-
-      <button
-        type="button"
-        onclick="seConnecter()"
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium">
-
-        Se connecter
-
-      </button>
-
-      <p id="message-connexion"
-         class="text-sm text-center">
-      </p>
-
-    </div>
-
-  </div>
-
-
-  <!-- ============================================================
-       UTILISATEUR CONNECTÉ
-       ============================================================ -->
-
-  <div id="zone-utilisateur"
-       class="hidden max-w-6xl mx-auto px-4 mb-6">
-
-    <div class="bg-green-50 border border-green-200 rounded-xl p-4
-                flex flex-col sm:flex-row justify-between
-                items-center gap-3">
-
-      <div>
-
-        <p class="text-sm text-green-700">
-          ✅ Vous êtes connecté
-        </p>
-
-        <p id="utilisateur-email"
-           class="font-semibold text-green-800">
-        </p>
-
-      </div>
-
-      <button
-        type="button"
-        onclick="seDeconnecter()"
-        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
-
-        Se déconnecter
-
-      </button>
-
-    </div>
-
-  </div>
-
-<!-- ================================================== -->
-<!-- MENU PRINCIPAL -->
-<!-- ================================================== -->
-
-<nav class="bg-blue-600 text-white shadow-md">
-
-  <div class="max-w-6xl mx-auto px-4">
-
-    <div class="flex items-center justify-between h-16">
-
-      <!-- Logo -->
-
-      <a href="index.html"
-         class="text-xl font-bold">
-
-        💰 MesDeps
-
-      </a>
-
-
-      <!-- Menu -->
-
-      <div class="flex items-center gap-2">
+        <!-- Logo -->
 
         <a href="index.html"
-           class="px-3 py-2 rounded-lg hover:bg-blue-700 transition">
+           class="text-xl font-bold">
 
-          🏠 Accueil
-
-        </a>
-
-
-        <a href="Depenses.html"
-           class="px-3 py-2 rounded-lg bg-blue-700 font-medium">
-
-          💰 Dépenses
+          💰 MesDeps
 
         </a>
 
 
-        <a href="SIAD.html"
-           class="px-3 py-2 rounded-lg hover:bg-blue-700 transition">
+        <!-- Menu -->
 
-          📊 SIAD
+        <div class="flex items-center gap-2">
 
-        </a>
+          <a href="index.html"
+             class="px-3 py-2 rounded-lg
+                    hover:bg-blue-700 transition">
+
+            🏠 Accueil
+
+          </a>
+
+
+          <a href="Depenses.html"
+             class="px-3 py-2 rounded-lg
+                    bg-blue-700 font-medium">
+
+            💰 Dépenses
+
+          </a>
+
+
+          <a href="SIAD.html"
+             class="px-3 py-2 rounded-lg
+                    hover:bg-blue-700 transition">
+
+            📊 SIAD
+
+          </a>
+
+        </div>
 
       </div>
 
     </div>
 
-  </div>
-
-</nav>
+  </nav>
 
 
 
-<!-- ================================================== -->
-<!-- CONTENU -->
-<!-- ================================================== -->
+  <!-- ==================================================
+       CONTENU PRINCIPAL
+       ================================================== -->
 
-<main class="max-w-6xl mx-auto px-4 py-8">
+  <main class="max-w-6xl mx-auto px-4 py-8">
 
 
-  <!-- TITRE -->
+    <!-- ==================================================
+         TITRE
+         ================================================== -->
 
-  <div class="flex flex-col sm:flex-row
-              justify-between items-start
-              sm:items-center gap-4 mb-8">
+    <div class="flex flex-col sm:flex-row
+                justify-between items-start
+                sm:items-center gap-4 mb-8">
 
-    <div>
+      <div>
 
-      <h1 class="text-3xl font-bold text-gray-800">
+        <h1 class="text-3xl font-bold text-gray-800">
 
-        💰 Gestion des dépenses
+          💰 Gestion des dépenses
 
-      </h1>
+        </h1>
 
-      <p class="text-gray-500 mt-1">
 
-        Ajouter et gérer vos dépenses
+        <p class="text-gray-500 mt-1">
 
-      </p>
+          Ajouter et gérer vos dépenses
+
+        </p>
+
+      </div>
+
+
+      <!-- Bouton Ajouter -->
+
+      <button
+        onclick="ouvrirModal()"
+        class="bg-blue-600 hover:bg-blue-700
+               text-white px-5 py-2.5
+               rounded-lg font-medium shadow">
+
+        ➕ Ajouter une dépense
+
+      </button>
 
     </div>
 
 
-    <!-- Bouton -->
 
-    <button onclick="ouvrirModal()"
-            class="bg-blue-600 hover:bg-blue-700
-                   text-white px-5 py-2.5
-                   rounded-lg font-medium shadow">
+    <!-- ==================================================
+         FILTRES
+         ================================================== -->
 
-      ➕ Ajouter une dépense
+    <div class="bg-white rounded-xl shadow p-5 mb-6">
 
-    </button>
+      <h2 class="text-lg font-semibold mb-4">
 
-  </div>
+        🔎 Recherche et filtres
+
+      </h2>
+
+
+      <div class="grid grid-cols-1
+                  sm:grid-cols-2
+                  lg:grid-cols-4 gap-4">
+
+
+        <!-- Date début -->
+
+        <div>
+
+          <label
+            class="block text-sm
+                   font-medium text-gray-700 mb-1">
+
+            Date début
+
+          </label>
+
+
+          <input
+            type="date"
+            id="filtre-date-debut"
+            class="w-full border border-gray-300
+                   rounded-lg px-3 py-2">
+
+        </div>
+
+
+        <!-- Date fin -->
+
+        <div>
+
+          <label
+            class="block text-sm
+                   font-medium text-gray-700 mb-1">
+
+            Date fin
+
+          </label>
+
+
+          <input
+            type="date"
+            id="filtre-date-fin"
+            class="w-full border border-gray-300
+                   rounded-lg px-3 py-2">
+
+        </div>
+
+
+        <!-- Catégorie -->
+
+        <div>
+
+          <label
+            class="block text-sm
+                   font-medium text-gray-700 mb-1">
+
+            Catégorie
+
+          </label>
+
+
+          <select
+            id="filtre-categorie"
+            class="w-full border border-gray-300
+                   rounded-lg px-3 py-2">
+
+            <option value="">
+              Toutes les catégories
+            </option>
+
+            <option value="Alimentation">
+              Alimentation
+            </option>
+
+            <option value="Café">
+              Café
+            </option>
+
+            <option value="Essence">
+              Essence
+            </option>
+
+            <option value="Enfant">
+              Enfant
+            </option>
+
+            <option value="Eau">
+              Eau
+            </option>
+
+            <option value="Communication">
+              Communication
+            </option>
+
+            <option value="Travail">
+              Travail
+            </option>
+
+            <option value="Bricolage">
+              Bricolage
+            </option>
+
+            <option value="Réparation">
+              Réparation
+            </option>
+
+            <option value="Habillements">
+              Habillements
+            </option>
+
+            <option value="Autres">
+              Autres
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- Recherche -->
+
+        <div>
+
+          <label
+            class="block text-sm
+                   font-medium text-gray-700 mb-1">
+
+            Recherche
+
+          </label>
+
+
+          <input
+            type="text"
+            id="filtre-recherche"
+            placeholder="Description..."
+
+            class="w-full border border-gray-300
+                   rounded-lg px-3 py-2">
+
+        </div>
+
+      </div>
+
+
+      <!-- Boutons -->
+
+      <div class="flex gap-3 mt-4">
+
+        <button
+          onclick="appliquerFiltres()"
+          class="bg-blue-600 hover:bg-blue-700
+                 text-white px-4 py-2
+                 rounded-lg">
+
+          🔎 Filtrer
+
+        </button>
+
+
+        <button
+          onclick="reinitialiserFiltres()"
+          class="border border-gray-300
+                 px-4 py-2 rounded-lg
+                 hover:bg-gray-50">
+
+          ↻ Réinitialiser
+
+        </button>
+
+      </div>
+
+    </div>
 
 
 
-  <!-- ================================================== -->
-  <!-- FILTRES -->
-  <!-- ================================================== -->
-
-  <div class="bg-white rounded-xl shadow p-5 mb-6">
-
-    <h2 class="text-lg font-semibold mb-4">
-
-      🔎 Recherche et filtres
-
-    </h2>
-
+    <!-- ==================================================
+         RÉSUMÉ
+         ================================================== -->
 
     <div class="grid grid-cols-1
-                sm:grid-cols-2
-                lg:grid-cols-4 gap-4">
+                sm:grid-cols-3 gap-4 mb-6">
 
 
-      <!-- Date début -->
+      <!-- Nombre -->
 
-      <div>
+      <div
+        class="bg-white rounded-xl shadow p-5
+               border-l-4 border-blue-500">
 
-        <label class="block text-sm
-                      font-medium text-gray-700 mb-1">
+        <p class="text-sm text-gray-500">
 
-          Date début
+          Nombre de dépenses
 
-        </label>
-
-        <input type="date"
-               id="filtre-date-debut"
-               class="w-full border border-gray-300
-                      rounded-lg px-3 py-2">
-
-      </div>
+        </p>
 
 
-      <!-- Date fin -->
+        <p
+          id="nombre-depenses"
+          class="text-2xl font-bold text-blue-600">
 
-      <div>
+          0
 
-        <label class="block text-sm
-                      font-medium text-gray-700 mb-1">
-
-          Date fin
-
-        </label>
-
-        <input type="date"
-               id="filtre-date-fin"
-               class="w-full border border-gray-300
-                      rounded-lg px-3 py-2">
+        </p>
 
       </div>
 
 
-      <!-- Catégorie -->
+      <!-- Total -->
 
-      <div>
+      <div
+        class="bg-white rounded-xl shadow p-5
+               border-l-4 border-red-500">
 
-        <label class="block text-sm
-                      font-medium text-gray-700 mb-1">
+        <p class="text-sm text-gray-500">
 
-          Catégorie
+          Total
 
-        </label>
+        </p>
 
-        <select id="filtre-categorie"
-                class="w-full border border-gray-300
-                       rounded-lg px-3 py-2">
 
-          <option value="">Toutes les catégories</option>
+        <p
+          id="total-depenses"
+          class="text-2xl font-bold text-red-600">
 
-          <option value="Alimentation">
-            Alimentation
-          </option>
+          0,000 DT
 
-          <option value="Café">
-            Café
-          </option>
-
-          <option value="Essence">
-            Essence
-          </option>
-
-          <option value="Enfant">
-            Enfant
-          </option>
-
-          <option value="Eau">
-            Eau
-          </option>
-
-          <option value="Communication">
-            Communication
-          </option>
-
-          <option value="Travail">
-            Travail
-          </option>
-
-          <option value="Bricolage">
-            Bricolage
-          </option>
-
-          <option value="Réparation">
-            Réparation
-          </option>
-
-          <option value="Habillements">
-            Habillements
-          </option>
-
-          <option value="Autres">
-            Autres
-          </option>
-
-        </select>
+        </p>
 
       </div>
 
 
-      <!-- Recherche -->
+      <!-- Moyenne -->
 
-      <div>
+      <div
+        class="bg-white rounded-xl shadow p-5
+               border-l-4 border-green-500">
 
-        <label class="block text-sm
-                      font-medium text-gray-700 mb-1">
+        <p class="text-sm text-gray-500">
 
-          Recherche
+          Moyenne
 
-        </label>
+        </p>
 
-        <input type="text"
-               id="filtre-recherche"
-               placeholder="Description..."
 
-               class="w-full border border-gray-300
-                      rounded-lg px-3 py-2">
+        <p
+          id="moyenne-depenses"
+          class="text-2xl font-bold text-green-600">
+
+          0,000 DT
+
+        </p>
 
       </div>
 
     </div>
 
 
-    <!-- Boutons filtres -->
 
-    <div class="flex gap-3 mt-4">
+    <!-- ==================================================
+         LISTE DES DÉPENSES
+         ================================================== -->
 
-      <button onclick="appliquerFiltres()"
-              class="bg-blue-600 hover:bg-blue-700
-                     text-white px-4 py-2
-                     rounded-lg">
+    <div class="bg-white rounded-xl shadow p-5">
 
-        🔎 Filtrer
 
-      </button>
+      <div class="flex justify-between
+                  items-center mb-5">
 
+        <h2 class="text-lg font-semibold">
 
-      <button onclick="reinitialiserFiltres()"
-              class="border border-gray-300
-                     px-4 py-2 rounded-lg
-                     hover:bg-gray-50">
+          📋 Liste des dépenses
 
-        ↻ Réinitialiser
-
-      </button>
-
-    </div>
-
-  </div>
-
-
-
-  <!-- ================================================== -->
-  <!-- RÉSUMÉ -->
-  <!-- ================================================== -->
-
-  <div class="grid grid-cols-1
-              sm:grid-cols-3 gap-4 mb-6">
-
-
-    <div class="bg-white rounded-xl shadow p-5
-                border-l-4 border-blue-500">
-
-      <p class="text-sm text-gray-500">
-
-        Nombre de dépenses
-
-      </p>
-
-      <p id="nombre-depenses"
-         class="text-2xl font-bold text-blue-600">
-
-        0
-
-      </p>
-
-    </div>
-
-
-    <div class="bg-white rounded-xl shadow p-5
-                border-l-4 border-red-500">
-
-      <p class="text-sm text-gray-500">
-
-        Total
-
-      </p>
-
-      <p id="total-depenses"
-         class="text-2xl font-bold text-red-600">
-
-        0,000 DT
-
-      </p>
-
-    </div>
-
-
-    <div class="bg-white rounded-xl shadow p-5
-                border-l-4 border-green-500">
-
-      <p class="text-sm text-gray-500">
-
-        Moyenne
-
-      </p>
-
-      <p id="moyenne-depenses"
-         class="text-2xl font-bold text-green-600">
-
-        0,000 DT
-
-      </p>
-
-    </div>
-
-  </div>
-
-
-
-  <!-- ================================================== -->
-  <!-- LISTE DES DÉPENSES -->
-  <!-- ================================================== -->
-
-  <div class="bg-white rounded-xl shadow p-5">
-
-    <div class="flex justify-between
-                items-center mb-5">
-
-      <h2 class="text-lg font-semibold">
-
-        📋 Liste des dépenses
-
-      </h2>
-
-    </div>
-
-
-    <div id="liste-depenses"
-         class="space-y-3
-                max-h-[600px]
-                overflow-y-auto">
-
-      <p class="text-gray-400 text-sm">
-
-        Chargement...
-
-      </p>
-
-    </div>
-
-  </div>
-
-</main>
-
-
-
-<!-- ================================================== -->
-<!-- MODAL AJOUT DÉPENSE -->
-<!-- ================================================== -->
-
-<div id="modal"
-     class="fixed inset-0 bg-black/50
-            hidden items-center
-            justify-center z-50">
-
-
-  <div class="bg-white rounded-xl shadow-xl
-              w-full max-w-md mx-4 p-6">
-
-
-    <!-- Titre -->
-
-    <div class="flex justify-between
-                items-center mb-5">
-
-      <h2 class="text-xl font-bold">
-
-        ➕ Nouvelle dépense
-
-      </h2>
-
-
-      <button onclick="fermerModal()"
-              class="text-gray-400
-                     hover:text-gray-600
-                     text-2xl">
-
-        &times;
-
-      </button>
-
-    </div>
-
-
-
-    <!-- FORMULAIRE -->
-
-    <form id="form-depense"
-          class="space-y-4">
-
-
-      <!-- Montant -->
-
-      <div>
-
-        <label class="block text-sm
-                      font-medium text-gray-700 mb-1">
-
-          Montant (DT) *
-
-        </label>
-
-        <input type="number"
-               id="montant"
-               step="0.001"
-               min="0.001"
-               required
-
-               class="w-full border
-                      border-gray-300
-                      rounded-lg px-3 py-2"
-
-               placeholder="2.200">
+        </h2>
 
       </div>
 
 
+      <div
+        id="liste-depenses"
+        class="space-y-3
+               max-h-[600px]
+               overflow-y-auto">
 
-      <!-- Date -->
+        <p class="text-gray-400 text-sm">
 
-      <div>
+          Chargement...
 
-        <label class="block text-sm
-                      font-medium text-gray-700 mb-1">
-
-          Date *
-
-        </label>
-
-        <input type="date"
-               id="date"
-               required
-
-               class="w-full border
-                      border-gray-300
-                      rounded-lg px-3 py-2">
+        </p>
 
       </div>
 
+    </div>
 
-
-      <!-- Catégorie -->
-
-      <div>
-
-        <label class="block text-sm
-                      font-medium text-gray-700 mb-1">
-
-          Catégorie *
-
-        </label>
-
-        <select id="categorie"
-                required
-                onchange="gererAutres()"
-
-                class="w-full border
-                       border-gray-300
-                       rounded-lg px-3 py-2">
-
-          <option value="">
-            -- Choisir --
-          </option>
-
-          <option value="Alimentation">
-            Alimentation
-          </option>
-
-          <option value="Café">
-            Café
-          </option>
-
-          <option value="Essence">
-            Essence
-          </option>
-
-          <option value="Enfant">
-            Enfant
-          </option>
-
-          <option value="Eau">
-            Eau
-          </option>
-
-          <option value="Communication">
-            Communication
-          </option>
-
-          <option value="Travail">
-            Travail
-          </option>
-
-          <option value="Bricolage">
-            Bricolage
-          </option>
-
-          <option value="Réparation">
-            Réparation
-          </option>
-
-          <option value="Habillements">
-            Habillements
-          </option>
-
-          <option value="Autres">
-            Autres
-          </option>
-
-        </select>
-
-      </div>
+  </main>
 
 
 
-      <!-- AUTRES -->
+  <!-- ==================================================
+       MODAL AJOUT DÉPENSE
+       ================================================== -->
 
-      <div id="champ-autres"
-           class="hidden">
-
-        <label class="block text-sm
-                      font-medium text-gray-700 mb-1">
-
-          Préciser (Autres) *
-
-        </label>
-
-        <input type="text"
-               id="precision-autres"
-
-               class="w-full border
-                      border-gray-300
-                      rounded-lg px-3 py-2"
-
-               placeholder="Ex: Cadeau, Pharmacie...">
-
-      </div>
+  <div
+    id="modal"
+    class="fixed inset-0 bg-black/50
+           hidden items-center
+           justify-center z-50">
 
 
-
-      <!-- DESCRIPTION -->
-
-      <div>
-
-        <label class="block text-sm
-                      font-medium text-gray-700 mb-1">
-
-          Description
-
-        </label>
-
-        <input type="text"
-               id="description"
-
-               class="w-full border
-                      border-gray-300
-                      rounded-lg px-3 py-2"
-
-               placeholder="Ex: Courses">
-
-      </div>
+    <div
+      class="bg-white rounded-xl shadow-xl
+             w-full max-w-md mx-4 p-6">
 
 
+      <!-- Titre -->
 
-      <!-- BOUTONS -->
+      <div
+        class="flex justify-between
+               items-center mb-5">
 
-      <div class="flex gap-3 pt-2">
+        <h2 class="text-xl font-bold">
 
-        <button type="button"
-                onclick="fermerModal()"
+          ➕ Nouvelle dépense
 
-                class="flex-1 border
-                       border-gray-300
-                       py-2.5 rounded-lg
-                       hover:bg-gray-50">
-
-          Annuler
-
-        </button>
+        </h2>
 
 
-        <button type="submit"
+        <button
+          onclick="fermerModal()"
+          class="text-gray-400
+                 hover:text-gray-600
+                 text-2xl">
 
-                class="flex-1 bg-blue-600
-                       hover:bg-blue-700
-                       text-white py-2.5
-                       rounded-lg font-medium">
-
-          Enregistrer
+          &times;
 
         </button>
 
       </div>
 
-    </form>
+
+
+      <!-- FORMULAIRE -->
+
+      <form
+        id="form-depense"
+        class="space-y-4">
+
+
+        <!-- Montant -->
+
+        <div>
+
+          <label
+            class="block text-sm
+                   font-medium text-gray-700 mb-1">
+
+            Montant (DT) *
+
+          </label>
+
+
+          <input
+            type="number"
+            id="montant"
+            step="0.001"
+            min="0.001"
+            required
+
+            class="w-full border
+                   border-gray-300
+                   rounded-lg px-3 py-2"
+
+            placeholder="2.200">
+
+        </div>
+
+
+
+        <!-- Date -->
+
+        <div>
+
+          <label
+            class="block text-sm
+                   font-medium text-gray-700 mb-1">
+
+            Date *
+
+          </label>
+
+
+          <input
+            type="date"
+            id="date"
+            required
+
+            class="w-full border
+                   border-gray-300
+                   rounded-lg px-3 py-2">
+
+        </div>
+
+
+
+        <!-- Catégorie -->
+
+        <div>
+
+          <label
+            class="block text-sm
+                   font-medium text-gray-700 mb-1">
+
+            Catégorie *
+
+          </label>
+
+
+          <select
+            id="categorie"
+            required
+            onchange="gererAutres()"
+
+            class="w-full border
+                   border-gray-300
+                   rounded-lg px-3 py-2">
+
+
+            <option value="">
+              -- Choisir --
+            </option>
+
+
+            <option value="Alimentation">
+              Alimentation
+            </option>
+
+
+            <option value="Café">
+              Café
+            </option>
+
+
+            <option value="Essence">
+              Essence
+            </option>
+
+
+            <option value="Enfant">
+              Enfant
+            </option>
+
+
+            <option value="Eau">
+              Eau
+            </option>
+
+
+            <option value="Communication">
+              Communication
+            </option>
+
+
+            <option value="Travail">
+              Travail
+            </option>
+
+
+            <option value="Bricolage">
+              Bricolage
+            </option>
+
+
+            <option value="Réparation">
+              Réparation
+            </option>
+
+
+            <option value="Habillements">
+              Habillements
+            </option>
+
+
+            <option value="Autres">
+              Autres
+            </option>
+
+          </select>
+
+        </div>
+
+
+
+        <!-- AUTRES -->
+
+        <div
+          id="champ-autres"
+          class="hidden">
+
+
+          <label
+            class="block text-sm
+                   font-medium text-gray-700 mb-1">
+
+            Préciser (Autres) *
+
+          </label>
+
+
+          <input
+            type="text"
+            id="precision-autres"
+
+            class="w-full border
+                   border-gray-300
+                   rounded-lg px-3 py-2"
+
+            placeholder="Ex: Cadeau, Pharmacie...">
+
+        </div>
+
+
+
+        <!-- DESCRIPTION -->
+
+        <div>
+
+          <label
+            class="block text-sm
+                   font-medium text-gray-700 mb-1">
+
+            Description
+
+          </label>
+
+
+          <input
+            type="text"
+            id="description"
+
+            class="w-full border
+                   border-gray-300
+                   rounded-lg px-3 py-2"
+
+            placeholder="Ex: Courses">
+
+        </div>
+
+
+
+        <!-- BOUTONS -->
+
+        <div class="flex gap-3 pt-2">
+
+
+          <button
+            type="button"
+            onclick="fermerModal()"
+
+            class="flex-1 border
+                   border-gray-300
+                   py-2.5 rounded-lg
+                   hover:bg-gray-50">
+
+            Annuler
+
+          </button>
+
+
+          <button
+            type="submit"
+
+            class="flex-1 bg-blue-600
+                   hover:bg-blue-700
+                   text-white py-2.5
+                   rounded-lg font-medium">
+
+            Enregistrer
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
 
   </div>
 
-</div>
 
 
+  <!-- ==================================================
+       SCRIPT PRINCIPAL
+       ================================================== -->
 
-<!-- ================================================== -->
-<!-- SCRIPT -->
-<!-- ================================================== -->
+  <script src="script.js"></script>
 
-<script src="script.js"></script>
 
 </body>
+
 </html>
