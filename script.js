@@ -1,17 +1,40 @@
 // ============================================================
 // MESDEPS - SCRIPT PRINCIPAL
-// Version locale - sans Firebase
-// Gestion des dépenses avec localStorage
+// Firebase + Firestore
 // ============================================================
 
+// ============================================================
+// 1. CONFIGURATION FIREBASE
+// ============================================================
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB6CTUcJWbwL8GK-65PCFS1z7HXtDKYWEo",
+  authDomain: "mesdeps.firebaseapp.com",
+  projectId: "mesdeps",
+  storageBucket: "mesdeps.firebasestorage.app",
+  messagingSenderId: "216030223679",
+  appId: "1:216030223679:web:d6ee1c2aafd3f939c9078a"
+};
+
+// Initialisation Firebase
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+// Connexion Firestore
+
+const db = firebase.firestore();
+
+// Connexion Authentication
+
+const auth = firebase.auth();
 
 // ============================================================
-// 1. VARIABLES
+// 2. VARIABLES
 // ============================================================
 
 let toutesLesDepenses = [];
-
-const CLE_STOCKAGE = "mesdeps_depenses";
 
 
 // ============================================================
