@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>MesDeps - Dépenses</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body class="bg-gray-100 min-h-screen">
+
+
+<!-- ================================================== -->
+<!-- MENU PRINCIPAL -->
+<!-- ================================================== -->
+
+<nav class="bg-blue-600 text-white shadow-md">
+
+  <div class="max-w-6xl mx-auto px-4">
+
+    <div class="flex items-center justify-between h-16">
+
+      <!-- Logo -->
+
+      <a href="index.html"
+         class="text-xl font-bold">
+
+        💰 MesDeps
+
+      </a>
+
+
+      <!-- Menu -->
+
+      <div class="flex items-center gap-2">
+
+        <a href="index.html"
+           class="px-3 py-2 rounded-lg hover:bg-blue-700 transition">
+
+          🏠 Accueil
+
+        </a>
+
+
+        <a href="Depenses.html"
+           class="px-3 py-2 rounded-lg bg-blue-700 font-medium">
+
+          💰 Dépenses
+
+        </a>
+
+
+        <a href="SIAD.html"
+           class="px-3 py-2 rounded-lg hover:bg-blue-700 transition">
+
+          📊 SIAD
+
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</nav>
+
+
+
+<!-- ================================================== -->
+<!-- CONTENU -->
+<!-- ================================================== -->
+
+<main class="max-w-6xl mx-auto px-4 py-8">
+
+
+  <!-- TITRE -->
+
+  <div class="flex flex-col sm:flex-row
+              justify-between items-start
+              sm:items-center gap-4 mb-8">
+
+    <div>
+
+      <h1 class="text-3xl font-bold text-gray-800">
+
+        💰 Gestion des dépenses
+
+      </h1>
+
+      <p class="text-gray-500 mt-1">
+
+        Ajouter et gérer vos dépenses
+
+      </p>
+
+    </div>
+
+
+    <!-- Bouton -->
+
+    <button onclick="ouvrirModal()"
+            class="bg-blue-600 hover:bg-blue-700
+                   text-white px-5 py-2.5
+                   rounded-lg font-medium shadow">
+
+      ➕ Ajouter une dépense
+
+    </button>
+
+  </div>
+
+
+
+  <!-- ================================================== -->
+  <!-- FILTRES -->
+  <!-- ================================================== -->
+
+  <div class="bg-white rounded-xl shadow p-5 mb-6">
+
+    <h2 class="text-lg font-semibold mb-4">
+
+      🔎 Recherche et filtres
+
+    </h2>
+
+
+    <div class="grid grid-cols-1
+                sm:grid-cols-2
+                lg:grid-cols-4 gap-4">
+
+
+      <!-- Date début -->
+
+      <div>
+
+        <label class="block text-sm
+                      font-medium text-gray-700 mb-1">
+
+          Date début
+
+        </label>
+
+        <input type="date"
+               id="filtre-date-debut"
+               class="w-full border border-gray-300
+                      rounded-lg px-3 py-2">
+
+      </div>
+
+
+      <!-- Date fin -->
+
+      <div>
+
+        <label class="block text-sm
+                      font-medium text-gray-700 mb-1">
+
+          Date fin
+
+        </label>
+
+        <input type="date"
+               id="filtre-date-fin"
+               class="w-full border border-gray-300
+                      rounded-lg px-3 py-2">
+
+      </div>
+
+
+      <!-- Catégorie -->
+
+      <div>
+
+        <label class="block text-sm
+                      font-medium text-gray-700 mb-1">
+
+          Catégorie
+
+        </label>
+
+        <select id="filtre-categorie"
+                class="w-full border border-gray-300
+                       rounded-lg px-3 py-2">
+
+          <option value="">Toutes les catégories</option>
+
+          <option value="Alimentation">
+            Alimentation
+          </option>
+
+          <option value="Café">
+            Café
+          </option>
+
+          <option value="Essence">
+            Essence
+          </option>
+
+          <option value="Enfant">
+            Enfant
+          </option>
+
+          <option value="Eau">
+            Eau
+          </option>
+
+          <option value="Communication">
+            Communication
+          </option>
+
+          <option value="Travail">
+            Travail
+          </option>
+
+          <option value="Bricolage">
+            Bricolage
+          </option>
+
+          <option value="Réparation">
+            Réparation
+          </option>
+
+          <option value="Habillements">
+            Habillements
+          </option>
+
+          <option value="Autres">
+            Autres
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- Recherche -->
+
+      <div>
+
+        <label class="block text-sm
+                      font-medium text-gray-700 mb-1">
+
+          Recherche
+
+        </label>
+
+        <input type="text"
+               id="filtre-recherche"
+               placeholder="Description..."
+
+               class="w-full border border-gray-300
+                      rounded-lg px-3 py-2">
+
+      </div>
+
+    </div>
+
+
+    <!-- Boutons filtres -->
+
+    <div class="flex gap-3 mt-4">
+
+      <button onclick="appliquerFiltres()"
+              class="bg-blue-600 hover:bg-blue-700
+                     text-white px-4 py-2
+                     rounded-lg">
+
+        🔎 Filtrer
+
+      </button>
+
+
+      <button onclick="reinitialiserFiltres()"
+              class="border border-gray-300
+                     px-4 py-2 rounded-lg
+                     hover:bg-gray-50">
+
+        ↻ Réinitialiser
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- ================================================== -->
+  <!-- RÉSUMÉ -->
+  <!-- ================================================== -->
+
+  <div class="grid grid-cols-1
+              sm:grid-cols-3 gap-4 mb-6">
+
+
+    <div class="bg-white rounded-xl shadow p-5
+                border-l-4 border-blue-500">
+
+      <p class="text-sm text-gray-500">
+
+        Nombre de dépenses
+
+      </p>
+
+      <p id="nombre-depenses"
+         class="text-2xl font-bold text-blue-600">
+
+        0
+
+      </p>
+
+    </div>
+
+
+    <div class="bg-white rounded-xl shadow p-5
+                border-l-4 border-red-500">
+
+      <p class="text-sm text-gray-500">
+
+        Total
+
+      </p>
+
+      <p id="total-depenses"
+         class="text-2xl font-bold text-red-600">
+
+        0,000 DT
+
+      </p>
+
+    </div>
+
+
+    <div class="bg-white rounded-xl shadow p-5
+                border-l-4 border-green-500">
+
+      <p class="text-sm text-gray-500">
+
+        Moyenne
+
+      </p>
+
+      <p id="moyenne-depenses"
+         class="text-2xl font-bold text-green-600">
+
+        0,000 DT
+
+      </p>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- ================================================== -->
+  <!-- LISTE DES DÉPENSES -->
+  <!-- ================================================== -->
+
+  <div class="bg-white rounded-xl shadow p-5">
+
+    <div class="flex justify-between
+                items-center mb-5">
+
+      <h2 class="text-lg font-semibold">
+
+        📋 Liste des dépenses
+
+      </h2>
+
+    </div>
+
+
+    <div id="liste-depenses"
+         class="space-y-3
+                max-h-[600px]
+                overflow-y-auto">
+
+      <p class="text-gray-400 text-sm">
+
+        Chargement...
+
+      </p>
+
+    </div>
+
+  </div>
+
+</main>
+
+
+
+<!-- ================================================== -->
+<!-- MODAL AJOUT DÉPENSE -->
+<!-- ================================================== -->
+
+<div id="modal"
+     class="fixed inset-0 bg-black/50
+            hidden items-center
+            justify-center z-50">
+
+
+  <div class="bg-white rounded-xl shadow-xl
+              w-full max-w-md mx-4 p-6">
+
+
+    <!-- Titre -->
+
+    <div class="flex justify-between
+                items-center mb-5">
+
+      <h2 class="text-xl font-bold">
+
+        ➕ Nouvelle dépense
+
+      </h2>
+
+
+      <button onclick="fermerModal()"
+              class="text-gray-400
+                     hover:text-gray-600
+                     text-2xl">
+
+        &times;
+
+      </button>
+
+    </div>
+
+
+
+    <!-- FORMULAIRE -->
+
+    <form id="form-depense"
+          class="space-y-4">
+
+
+      <!-- Montant -->
+
+      <div>
+
+        <label class="block text-sm
+                      font-medium text-gray-700 mb-1">
+
+          Montant (DT) *
+
+        </label>
+
+        <input type="number"
+               id="montant"
+               step="0.001"
+               min="0.001"
+               required
+
+               class="w-full border
+                      border-gray-300
+                      rounded-lg px-3 py-2"
+
+               placeholder="2.200">
+
+      </div>
+
+
+
+      <!-- Date -->
+
+      <div>
+
+        <label class="block text-sm
+                      font-medium text-gray-700 mb-1">
+
+          Date *
+
+        </label>
+
+        <input type="date"
+               id="date"
+               required
+
+               class="w-full border
+                      border-gray-300
+                      rounded-lg px-3 py-2">
+
+      </div>
+
+
+
+      <!-- Catégorie -->
+
+      <div>
+
+        <label class="block text-sm
+                      font-medium text-gray-700 mb-1">
+
+          Catégorie *
+
+        </label>
+
+        <select id="categorie"
+                required
+                onchange="gererAutres()"
+
+                class="w-full border
+                       border-gray-300
+                       rounded-lg px-3 py-2">
+
+          <option value="">
+            -- Choisir --
+          </option>
+
+          <option value="Alimentation">
+            Alimentation
+          </option>
+
+          <option value="Café">
+            Café
+          </option>
+
+          <option value="Essence">
+            Essence
+          </option>
+
+          <option value="Enfant">
+            Enfant
+          </option>
+
+          <option value="Eau">
+            Eau
+          </option>
+
+          <option value="Communication">
+            Communication
+          </option>
+
+          <option value="Travail">
+            Travail
+          </option>
+
+          <option value="Bricolage">
+            Bricolage
+          </option>
+
+          <option value="Réparation">
+            Réparation
+          </option>
+
+          <option value="Habillements">
+            Habillements
+          </option>
+
+          <option value="Autres">
+            Autres
+          </option>
+
+        </select>
+
+      </div>
+
+
+
+      <!-- AUTRES -->
+
+      <div id="champ-autres"
+           class="hidden">
+
+        <label class="block text-sm
+                      font-medium text-gray-700 mb-1">
+
+          Préciser (Autres) *
+
+        </label>
+
+        <input type="text"
+               id="precision-autres"
+
+               class="w-full border
+                      border-gray-300
+                      rounded-lg px-3 py-2"
+
+               placeholder="Ex: Cadeau, Pharmacie...">
+
+      </div>
+
+
+
+      <!-- DESCRIPTION -->
+
+      <div>
+
+        <label class="block text-sm
+                      font-medium text-gray-700 mb-1">
+
+          Description
+
+        </label>
+
+        <input type="text"
+               id="description"
+
+               class="w-full border
+                      border-gray-300
+                      rounded-lg px-3 py-2"
+
+               placeholder="Ex: Courses">
+
+      </div>
+
+
+
+      <!-- BOUTONS -->
+
+      <div class="flex gap-3 pt-2">
+
+        <button type="button"
+                onclick="fermerModal()"
+
+                class="flex-1 border
+                       border-gray-300
+                       py-2.5 rounded-lg
+                       hover:bg-gray-50">
+
+          Annuler
+
+        </button>
+
+
+        <button type="submit"
+
+                class="flex-1 bg-blue-600
+                       hover:bg-blue-700
+                       text-white py-2.5
+                       rounded-lg font-medium">
+
+          Enregistrer
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+
+<!-- ================================================== -->
+<!-- SCRIPT -->
+<!-- ================================================== -->
+
+<script src="script.js"></script>
+
+</body>
+</html>
