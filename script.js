@@ -106,10 +106,283 @@ function formatDate(dateStr) {
 
 
 // ============================================================
-// 5. MODAL
+// 5. CONNEXION UTILISATEUR
+// ============================================================
+
+async function seConnecter() {
+
+  const email =
+    document.getElementById(
+      "email-connexion"
+    )?.value.trim();
+
+  const motDePasse =
+    document.getElementById(
+      "mot-de-passe-connexion"
+    )?.value;
+
+  const message =
+    document.getElementById(
+      "message-connexion"
+    );
+
+
+  if (!email || !motDePasse) {
+
+    if (message) {
+
+      message.textContent =
+        "Veuillez saisir votre e-mail et votre mot de passe.";
+
+      message.className =
+        "text-sm text-center text-red-600";
+
+    }
+
+    return;
+  }
+
+
+  try {
+
+    if (message) {
+
+      message.textContent =
+        "Connexion en cours...";
+
+      message.className =
+        "text-sm text-center text-blue-600";
+
+    }
+
+
+    await auth.signInWithEmailAndPassword(
+      email,
+      motDePasse
+    );
+
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "Erreur connexion Firebase :",
+      error
+    );
+
+
+    if (message) {
+
+      let texte =
+        "Erreur de connexion.";
+
+      if (
+        error.code ===
+        "auth/invalid-credential"
+      ) {
+
+        texte =
+          "E-mail ou mot de passe incorrect.";
+
+      }
+      else if (
+        error.code ===
+        "auth/invalid-email"
+      ) {
+
+        texte =
+          "Adresse e-mail invalide.";
+
+      }
+
+
+      message.textContent = texte;
+
+      message.className =
+        "text-sm text-center text-red-600";
+
+    }
+
+  }
+
+}
+
+
+// ============================================================
+// 6. DÉCONNEXION
+// ============================================================
+
+async function seDeconnecter() {
+
+  try {
+
+    await auth.signOut();
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "Erreur déconnexion :",
+      error
+    );
+
+    alert(
+      "Erreur lors de la déconnexion."
+    );
+
+  }
+
+}
+
+
+// ============================================================
+// 7. SURVEILLER L'ÉTAT DE CONNEXION
+// ============================================================
+
+auth.onAuthStateChanged(
+  async function (utilisateur) {
+
+    const zoneConnexion =
+      document.getElementById(
+        "zone-connexion"
+      );
+
+    const zoneUtilisateur =
+      document.getElementById(
+        "zone-utilisateur"
+      );
+
+    const emailUtilisateur =
+      document.getElementById(
+        "utilisateur-email"
+      );
+
+
+    // --------------------------------------------------------
+    // UTILISATEUR CONNECTÉ
+    // --------------------------------------------------------
+
+    if (utilisateur) {
+
+      console.log(
+        "Utilisateur connecté :",
+        utilisateur.email
+      );
+
+      console.log(
+        "UID :",
+        utilisateur.uid
+      );
+
+
+      if (zoneConnexion) {
+
+        zoneConnexion.classList.add(
+          "hidden"
+        );
+
+      }
+
+
+      if (zoneUtilisateur) {
+
+        zoneUtilisateur.classList.remove(
+          "hidden"
+        );
+
+      }
+
+
+      if (emailUtilisateur) {
+
+        emailUtilisateur.textContent =
+          utilisateur.email;
+
+      }
+
+
+      // Charger les dépenses de cet utilisateur
+
+      await chargerDepenses();
+
+    }
+
+
+    // --------------------------------------------------------
+    // UTILISATEUR NON CONNECTÉ
+    // --------------------------------------------------------
+
+    else {
+
+      console.log(
+        "Aucun utilisateur connecté."
+      );
+
+
+      toutesLesDepenses = [];
+
+
+      if (zoneConnexion) {
+
+        zoneConnexion.classList.remove(
+          "hidden"
+        );
+
+      }
+
+
+      if (zoneUtilisateur) {
+
+        zoneUtilisateur.classList.add(
+          "hidden"
+        );
+
+      }
+
+
+      const liste =
+        document.getElementById(
+          "liste-depenses"
+        );
+
+      if (liste) {
+
+        liste.innerHTML = `
+          <p class="text-gray-400 text-sm">
+            🔐 Connectez-vous pour afficher vos dépenses.
+          </p>
+        `;
+
+      }
+
+
+      mettreAJourResume([]);
+
+    }
+
+  }
+);
+
+
+// ============================================================
+// 8. MODAL
 // ============================================================
 
 function ouvrirModal() {
+
+  // Vérifier la connexion
+
+  if (!auth.currentUser) {
+
+    alert(
+      "Vous devez être connecté pour enregistrer une dépense."
+    );
+
+    return;
+  }
+
 
   const modal =
     document.getElementById("modal");
@@ -118,20 +391,35 @@ function ouvrirModal() {
     return;
   }
 
+
   const champDate =
     document.getElementById("date");
 
   if (champDate) {
-    champDate.value = getToday();
+
+    champDate.value =
+      getToday();
+
   }
 
-  modal.classList.remove("hidden");
 
-  modal.classList.add("flex");
+  modal.classList.remove(
+    "hidden"
+  );
+
+  modal.classList.add(
+    "flex"
+  );
+
 
   gererAutres();
+
 }
 
+
+// ============================================================
+// 9. FERMER MODAL
+// ============================================================
 
 function fermerModal() {
 
@@ -139,74 +427,115 @@ function fermerModal() {
     document.getElementById("modal");
 
   const formulaire =
-    document.getElementById("form-depense");
+    document.getElementById(
+      "form-depense"
+    );
+
 
   if (modal) {
 
-    modal.classList.add("hidden");
+    modal.classList.add(
+      "hidden"
+    );
 
-    modal.classList.remove("flex");
+    modal.classList.remove(
+      "flex"
+    );
+
   }
+
 
   if (formulaire) {
+
     formulaire.reset();
+
   }
+
 
   const champAutres =
-    document.getElementById("champ-autres");
+    document.getElementById(
+      "champ-autres"
+    );
 
   if (champAutres) {
-    champAutres.classList.add("hidden");
+
+    champAutres.classList.add(
+      "hidden"
+    );
+
   }
+
 }
 
 
 // ============================================================
-// 6. CATÉGORIE AUTRES
+// 10. CATÉGORIE AUTRES
 // ============================================================
 
 function gererAutres() {
 
   const categorie =
-    document.getElementById("categorie");
+    document.getElementById(
+      "categorie"
+    );
 
   const champ =
-    document.getElementById("champ-autres");
+    document.getElementById(
+      "champ-autres"
+    );
 
   const precision =
-    document.getElementById("precision-autres");
+    document.getElementById(
+      "precision-autres"
+    );
+
 
   if (
     !categorie ||
     !champ ||
     !precision
   ) {
+
     return;
+
   }
 
-  if (categorie.value === "Autres") {
 
-    champ.classList.remove("hidden");
+  if (
+    categorie.value === "Autres"
+  ) {
+
+    champ.classList.remove(
+      "hidden"
+    );
 
     precision.required = true;
 
-  } else {
+  }
 
-    champ.classList.add("hidden");
+  else {
+
+    champ.classList.add(
+      "hidden"
+    );
 
     precision.required = false;
 
     precision.value = "";
+
   }
+
 }
 
 
 // ============================================================
-// 7. AJOUT D'UNE DÉPENSE DANS FIRESTORE
+// 11. AJOUT D'UNE DÉPENSE
 // ============================================================
 
 const formulaire =
-  document.getElementById("form-depense");
+  document.getElementById(
+    "form-depense"
+  );
 
 
 if (formulaire) {
@@ -218,12 +547,13 @@ if (formulaire) {
       e.preventDefault();
 
 
-      // ------------------------------------------
-      // Vérifier la connexion
-      // ------------------------------------------
+      // ------------------------------------------------------
+      // Vérifier utilisateur connecté
+      // ------------------------------------------------------
 
       const utilisateur =
         auth.currentUser;
+
 
       if (!utilisateur) {
 
@@ -232,44 +562,55 @@ if (formulaire) {
         );
 
         return;
+
       }
 
 
-      // ------------------------------------------
-      // Récupération des champs
-      // ------------------------------------------
+      // ------------------------------------------------------
+      // Récupérer les données
+      // ------------------------------------------------------
 
       const montant =
         parseFloat(
-          document.getElementById("montant").value
+          document.getElementById(
+            "montant"
+          ).value
         );
 
 
       const date =
-        document.getElementById("date").value;
+        document.getElementById(
+          "date"
+        ).value;
 
 
       let categorie =
-        document.getElementById("categorie").value;
+        document.getElementById(
+          "categorie"
+        ).value;
 
 
       const precision =
         document
-          .getElementById("precision-autres")
+          .getElementById(
+            "precision-autres"
+          )
           .value
           .trim();
 
 
       const description =
         document
-          .getElementById("description")
+          .getElementById(
+            "description"
+          )
           .value
           .trim();
 
 
-      // ------------------------------------------
+      // ------------------------------------------------------
       // Vérifications
-      // ------------------------------------------
+      // ------------------------------------------------------
 
       if (
         !montant ||
@@ -281,6 +622,7 @@ if (formulaire) {
         );
 
         return;
+
       }
 
 
@@ -291,6 +633,7 @@ if (formulaire) {
         );
 
         return;
+
       }
 
 
@@ -301,14 +644,17 @@ if (formulaire) {
         );
 
         return;
+
       }
 
 
-      // ------------------------------------------
-      // Catégorie Autres
-      // ------------------------------------------
+      // ------------------------------------------------------
+      // Catégorie AUTRES
+      // ------------------------------------------------------
 
-      if (categorie === "Autres") {
+      if (
+        categorie === "Autres"
+      ) {
 
         if (!precision) {
 
@@ -317,16 +663,19 @@ if (formulaire) {
           );
 
           return;
+
         }
+
 
         categorie =
           "Autres - " + precision;
+
       }
 
 
-      // ------------------------------------------
+      // ------------------------------------------------------
       // Enregistrement Firestore
-      // ------------------------------------------
+      // ------------------------------------------------------
 
       try {
 
@@ -334,15 +683,20 @@ if (formulaire) {
           .collection("depenses")
           .add({
 
-            montant: montant,
+            montant:
+              montant,
 
-            date: date,
+            date:
+              date,
 
-            categorie: categorie,
+            categorie:
+              categorie,
 
-            description: description,
+            description:
+              description,
 
-            userId: utilisateur.uid,
+            userId:
+              utilisateur.uid,
 
             createdAt:
               firebase.firestore
@@ -353,37 +707,43 @@ if (formulaire) {
 
 
         alert(
-          "Dépense enregistrée avec succès."
+          "✅ Dépense enregistrée avec succès."
         );
 
 
         fermerModal();
 
 
+        // Recharger depuis Firestore
+
         await chargerDepenses();
 
       }
 
+
       catch (error) {
 
         console.error(
-          "Erreur Firebase :",
+          "Erreur Firestore :",
           error
         );
 
+
         alert(
-          "Erreur lors de l'enregistrement :\n" +
+          "❌ Erreur lors de l'enregistrement :\n" +
           error.message
         );
+
       }
 
     }
   );
+
 }
 
 
 // ============================================================
-// 8. CHARGEMENT DES DÉPENSES DEPUIS FIRESTORE
+// 12. CHARGER LES DÉPENSES DE L'UTILISATEUR
 // ============================================================
 
 async function chargerDepenses() {
@@ -391,8 +751,13 @@ async function chargerDepenses() {
   const utilisateur =
     auth.currentUser;
 
+
   if (!utilisateur) {
+
+    toutesLesDepenses = [];
+
     return;
+
   }
 
 
@@ -406,6 +771,10 @@ async function chargerDepenses() {
           "==",
           utilisateur.uid
         )
+        .orderBy(
+          "date",
+          "desc"
+        )
         .get();
 
 
@@ -417,25 +786,12 @@ async function chargerDepenses() {
 
         toutesLesDepenses.push({
 
-          id: doc.id,
+          id:
+            doc.id,
 
           ...doc.data()
 
         });
-
-      }
-    );
-
-
-    // Tri par date décroissante
-
-    toutesLesDepenses.sort(
-      function (a, b) {
-
-        return String(b.date || "")
-          .localeCompare(
-            String(a.date || "")
-          );
 
       }
     );
@@ -449,6 +805,7 @@ async function chargerDepenses() {
     mettreAJourResume(
       toutesLesDepenses
     );
+
 
   }
 
@@ -469,17 +826,22 @@ async function chargerDepenses() {
     if (liste) {
 
       liste.innerHTML = `
-        <p class="text-red-500">
+        <p class="text-red-500 text-sm">
           ❌ Erreur lors du chargement des dépenses.
+          <br>
+          ${echapperHTML(error.message)}
         </p>
       `;
+
     }
+
   }
+
 }
 
 
 // ============================================================
-// 9. AFFICHER LES DÉPENSES
+// 13. AFFICHER LES DÉPENSES
 // ============================================================
 
 function afficherDepenses(
@@ -503,16 +865,13 @@ function afficherDepenses(
   ) {
 
     conteneur.innerHTML = `
-
       <p class="text-gray-400 text-sm">
-
         Aucune dépense enregistrée.
-
       </p>
-
     `;
 
     return;
+
   }
 
 
@@ -530,8 +889,7 @@ function afficherDepenses(
 
             <div>
 
-              <p class="font-medium
-                        text-gray-800">
+              <p class="font-medium text-gray-800">
 
                 ${echapperHTML(
                   d.categorie ||
@@ -541,8 +899,7 @@ function afficherDepenses(
               </p>
 
 
-              <p class="text-sm
-                        text-gray-500">
+              <p class="text-sm text-gray-500">
 
                 ${formatDate(d.date)}
 
@@ -562,8 +919,7 @@ function afficherDepenses(
 
             <div class="text-right">
 
-              <p class="font-semibold
-                        text-red-600">
+              <p class="font-semibold text-red-600">
 
                 -${formatMoney(
                   d.montant
@@ -593,11 +949,12 @@ function afficherDepenses(
 
       }
     ).join("");
+
 }
 
 
 // ============================================================
-// 10. PROTECTION HTML
+// 14. PROTECTION HTML
 // ============================================================
 
 function echapperHTML(
@@ -630,23 +987,41 @@ function echapperHTML(
       /'/g,
       "&#039;"
     );
+
 }
 
 
 // ============================================================
-// 11. SUPPRESSION FIRESTORE
+// 15. SUPPRIMER UNE DÉPENSE
 // ============================================================
 
 async function supprimerDepense(
   id
 ) {
 
+  const utilisateur =
+    auth.currentUser;
+
+
+  if (!utilisateur) {
+
+    alert(
+      "Vous devez être connecté."
+    );
+
+    return;
+
+  }
+
+
   if (
     !confirm(
       "Voulez-vous vraiment supprimer cette dépense ?"
     )
   ) {
+
     return;
+
   }
 
 
@@ -662,6 +1037,7 @@ async function supprimerDepense(
 
   }
 
+
   catch (error) {
 
     console.error(
@@ -671,15 +1047,17 @@ async function supprimerDepense(
 
 
     alert(
-      "Erreur lors de la suppression :\n" +
+      "❌ Erreur lors de la suppression :\n" +
       error.message
     );
+
   }
+
 }
 
 
 // ============================================================
-// 12. RÉSUMÉ
+// 16. RÉSUMÉ
 // ============================================================
 
 function mettreAJourResume(
@@ -732,6 +1110,7 @@ function mettreAJourResume(
 
     elementNombre.textContent =
       nombre;
+
   }
 
 
@@ -739,6 +1118,7 @@ function mettreAJourResume(
 
     elementTotal.textContent =
       formatMoney(total);
+
   }
 
 
@@ -746,12 +1126,14 @@ function mettreAJourResume(
 
     elementMoyenne.textContent =
       formatMoney(moyenne);
+
   }
+
 }
 
 
 // ============================================================
-// 13. FILTRES
+// 17. FILTRES
 // ============================================================
 
 function appliquerFiltres() {
@@ -786,19 +1168,15 @@ function appliquerFiltres() {
     toutesLesDepenses.filter(
       function (d) {
 
-
-        // Date début
-
         if (
           dateDebut &&
           d.date < dateDebut
         ) {
 
           return false;
+
         }
 
-
-        // Date fin
 
         if (
           dateFin &&
@@ -806,10 +1184,9 @@ function appliquerFiltres() {
         ) {
 
           return false;
+
         }
 
-
-        // Catégorie
 
         if (
           categorie &&
@@ -821,10 +1198,9 @@ function appliquerFiltres() {
         ) {
 
           return false;
+
         }
 
-
-        // Recherche
 
         if (recherche) {
 
@@ -850,7 +1226,9 @@ function appliquerFiltres() {
           ) {
 
             return false;
+
           }
+
         }
 
 
@@ -868,11 +1246,12 @@ function appliquerFiltres() {
   mettreAJourResume(
     resultats
   );
+
 }
 
 
 // ============================================================
-// 14. RÉINITIALISER LES FILTRES
+// 18. RÉINITIALISER LES FILTRES
 // ============================================================
 
 function reinitialiserFiltres() {
@@ -902,22 +1281,30 @@ function reinitialiserFiltres() {
 
 
   if (dateDebut) {
+
     dateDebut.value = "";
+
   }
 
 
   if (dateFin) {
+
     dateFin.value = "";
+
   }
 
 
   if (categorie) {
+
     categorie.value = "";
+
   }
 
 
   if (recherche) {
+
     recherche.value = "";
+
   }
 
 
@@ -929,55 +1316,10 @@ function reinitialiserFiltres() {
   mettreAJourResume(
     toutesLesDepenses
   );
+
 }
 
 
 // ============================================================
-// 15. AUTHENTIFICATION
+// FIN DU SCRIPT
 // ============================================================
-
-auth.onAuthStateChanged(
-  function (utilisateur) {
-
-    if (utilisateur) {
-
-      console.log(
-        "Utilisateur connecté :",
-        utilisateur.email
-      );
-
-
-      chargerDepenses();
-
-    }
-
-    else {
-
-      console.log(
-        "Aucun utilisateur connecté."
-      );
-
-
-      const liste =
-        document.getElementById(
-          "liste-depenses"
-        );
-
-
-      if (liste) {
-
-        liste.innerHTML = `
-
-          <p class="text-gray-500">
-
-            🔐 Veuillez vous connecter
-            pour accéder à vos dépenses.
-
-          </p>
-
-        `;
-      }
-    }
-
-  }
-);
