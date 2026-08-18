@@ -1,0 +1,21 @@
+/* Styles personnalisés (en plus de Tailwind) */
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Amélioration du scroll de la liste */
+#liste-depenses {
+  scrollbar-width: thin;
+}
+
+/* Animation légère pour le modal */
+#modal {
+  transition: opacity 0.2s ease;
+}
+
+/* Style des inputs focus */
+input:focus,
+select:focus {
+  outline: none;
+}
