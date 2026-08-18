@@ -1,21 +1,243 @@
-/* Styles personnalisés (en plus de Tailwind) */
+/* =========================================================
+   MESDEPS - STYLES PERSONNALISÉS
+   ========================================================= */
+
+
+/* =========================================================
+   1. STYLE GÉNÉRAL
+   ========================================================= */
+
+html {
+  scroll-behavior: smooth;
+}
 
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Amélioration du scroll de la liste */
-#liste-depenses {
-  scrollbar-width: thin;
+
+/* =========================================================
+   2. MENU PRINCIPAL
+   ========================================================= */
+
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
 }
 
-/* Animation légère pour le modal */
-#modal {
-  transition: opacity 0.2s ease;
+
+/* =========================================================
+   3. BOUTONS
+   ========================================================= */
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Style des inputs focus */
+button {
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+
+/* =========================================================
+   4. INPUTS ET SELECT
+   ========================================================= */
+
+input,
+select {
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
 input:focus,
 select:focus {
   outline: none;
+}
+
+
+/* =========================================================
+   5. MODAL
+   ========================================================= */
+
+#modal {
+  transition:
+    opacity 0.2s ease;
+}
+
+
+/* =========================================================
+   6. LISTE DES DÉPENSES
+   ========================================================= */
+
+#liste-depenses {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+
+/* Chrome / Edge */
+
+#liste-depenses::-webkit-scrollbar {
+  width: 6px;
+}
+
+#liste-depenses::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#liste-depenses::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+
+/* =========================================================
+   7. TABLEAUX SIAD
+   ========================================================= */
+
+#tableau-type,
+#tableau-jour,
+#tableau-semaine,
+#tableau-mois {
+  overflow-x: auto;
+}
+
+
+/* =========================================================
+   8. CANVAS DES GRAPHIQUES
+   ========================================================= */
+
+canvas {
+  max-width: 100%;
+}
+
+
+/* =========================================================
+   9. CARTES
+   ========================================================= */
+
+.bg-white {
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+/* Sur ordinateur uniquement */
+
+@media (hover: hover) {
+
+  .bg-white:hover {
+    box-shadow:
+      0 8px 20px rgba(0, 0, 0, 0.08);
+  }
+
+}
+
+
+/* =========================================================
+   10. RESPONSIVE SMARTPHONE
+   ========================================================= */
+
+@media (max-width: 640px) {
+
+  body {
+    font-size: 14px;
+  }
+
+
+  /* Menu */
+
+  nav .max-w-6xl {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+
+  nav a {
+    font-size: 13px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+
+  /* Titres */
+
+  h1 {
+    font-size: 1.6rem !important;
+  }
+
+
+  h2 {
+    font-size: 1.1rem !important;
+  }
+
+
+  /* Cartes */
+
+  .rounded-xl {
+    border-radius: 12px;
+  }
+
+
+  /* Espacement */
+
+  main {
+    padding-top: 24px !important;
+  }
+
+
+  /* Graphiques */
+
+  canvas {
+    max-height: 300px;
+  }
+
+}
+
+
+/* =========================================================
+   11. TRÈS PETITS ÉCRANS
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+  nav a {
+    font-size: 12px;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
+}
+
+
+/* =========================================================
+   12. ACCESSIBILITÉ
+   ========================================================= */
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
 }
