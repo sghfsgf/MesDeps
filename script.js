@@ -1423,6 +1423,169 @@ if (
 
 }
 
+// ============================================================
+// 18. EXPORTER LES DÉPENSES VERS EXCEL
+// ============================================================
+
+function exporterDepensesExcel() {
+
+  // ----------------------------------------------------------
+  // Vérifier que la bibliothèque XLSX est disponible
+  // ----------------------------------------------------------
+
+  if (typeof XLSX === "undefined") {
+
+    alert(
+      "❌ La bibliothèque Excel n'est pas chargée."
+    );
+
+    return;
+
+  }
+
+
+  // ----------------------------------------------------------
+  // Vérifier qu'il existe des dépenses
+  // ----------------------------------------------------------
+
+  if (
+    !toutesLesDepenses ||
+    toutesLesDepenses.length === 0
+  ) {
+
+    alert(
+      "ℹ️ Aucune dépense à exporter."
+    );
+
+    return;
+
+  }
+
+
+  // ----------------------------------------------------------
+  // Préparer les données Excel
+  // ----------------------------------------------------------
+
+  const donneesExcel =
+    toutesLesDepenses.map(
+      function (d) {
+
+        return {
+
+          "Date":
+            d.date || "",
+
+          "Catégorie":
+            d.categorie || "",
+
+          "Description":
+            d.description || "",
+
+          "Montant (DT)":
+            Number(d.montant || 0)
+
+        };
+
+      }
+    );
+
+
+  // ----------------------------------------------------------
+  // Créer la feuille Excel
+  // ----------------------------------------------------------
+
+  const feuille =
+    XLSX.utils.json_to_sheet(
+      donneesExcel
+    );
+
+
+  // ----------------------------------------------------------
+  // Largeur des colonnes
+  // ----------------------------------------------------------
+
+  feuille["!cols"] = [
+
+    {
+      wch: 14
+    },
+
+    {
+      wch: 20
+    },
+
+    {
+      wch: 40
+    },
+
+    {
+      wch: 15
+    }
+
+  ];
+
+
+  // ----------------------------------------------------------
+  // Créer le classeur
+  // ----------------------------------------------------------
+
+  const classeur =
+    XLSX.utils.book_new();
+
+
+  XLSX.utils.book_append_sheet(
+    classeur,
+    feuille,
+    "Dépenses"
+  );
+
+
+  // ----------------------------------------------------------
+  // Nom du fichier
+  // ----------------------------------------------------------
+
+  const date =
+    new Date();
+
+  const annee =
+    date.getFullYear();
+
+  const mois =
+    String(
+      date.getMonth() + 1
+    ).padStart(2, "0");
+
+  const jour =
+    String(
+      date.getDate()
+    ).padStart(2, "0");
+
+
+  const nomFichier =
+    `MesDeps_Depenses_${annee}-${mois}-${jour}.xlsx`;
+
+
+  // ----------------------------------------------------------
+  // Télécharger le fichier Excel
+  // ----------------------------------------------------------
+
+  XLSX.writeFile(
+    classeur,
+    nomFichier
+  );
+
+
+  // ----------------------------------------------------------
+  // Confirmation
+  // ----------------------------------------------------------
+
+  alert(
+    "✅ Export Excel terminé.\n\n" +
+    toutesLesDepenses.length +
+    " dépense(s) exportée(s)."
+  );
+
+}
 
 // ============================================================
 // FIN
