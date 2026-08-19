@@ -778,7 +778,7 @@ function afficherParType(
 
 
     tableau.innerHTML =
-        categories
+       [...categories]
             .sort(function(a, b) {
 
                 return (
